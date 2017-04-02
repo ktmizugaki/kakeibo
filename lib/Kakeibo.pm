@@ -38,6 +38,8 @@ sub json_api {
 }
 
 sub app {
+    open STDOUT, ">> log/plackup.stdout.log";
+    open STDERR, ">> log/plackup.stderr.log";
     my $env = shift;
     return json_api($env, sub {
         my $req = Plack::Request::WithEncoding->new(shift);

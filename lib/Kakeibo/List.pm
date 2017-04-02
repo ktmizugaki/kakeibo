@@ -7,7 +7,7 @@ use Kakeibo::Lib::Validator qw/permit add_error/;
 use Kakeibo::Item;
 
 my $select_initial_kamokus = prepare("select id from kamokus where category_id = 4");
-my $select_lists = prepare("select id,date,amount from lists");
+my $select_lists = prepare("select id,date,amount,is_initial from lists");
 my $select_lists_for_month = prepare("select id,date,amount,is_initial from lists where date like ?");
 my $select_lists_for_date = prepare("select id,date,amount,is_initial from lists where date like ?");
 my $select_list = prepare("select id,date,amount,is_initial from lists where id = ?");

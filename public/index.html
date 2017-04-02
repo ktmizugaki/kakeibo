@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/bootstrap-reboot-4.0.0a6.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/partial.css">
+  <script type="text/javascript" src="js/json3-3.3.2.min.js"></script>
+  <script type="text/javascript" src="js/promise-7.0.4.min.js"></script>
+  <script type="text/javascript" src="js/fetch-2.0.2.min.js"></script>
+  <script type="text/javascript" src="js/knockout-3.4.1.min.js"></script>
+  <script type="text/javascript" src="js/knockout.mapping-2.4.1.min.js"></script>
+  <script type="text/javascript" src="js/ko.extend.js"></script>
+  <script type="text/javascript" src="js/json_api.js"></script>
+  <script type="text/javascript" src="js/date.js"></script>
+  <script type="text/javascript" src="js/models.js"></script>
+  <script type="text/javascript" src="js/manager.js"></script>
+  <script type="text/javascript" src="js/strerr.jp.js"></script>
+  <script type="text/javascript" src="js/page.js"></script>
+  <script type="text/html" id="template-empty">
+  </script>
+  <script type="text/html" id="template-kamokus">
+    <h2>勘定科目</h2>
+    <table border="1">
+      <colgroup>
+        <col class="col-category">
+        <col class="col-id">
+        <col class="col-kamoku-code">
+        <col class="col-kamoku-name">
+      </colgroup>
+      <thead><tr>
+          <th>分類</th>
+          <th>ID</th>
+          <th>コード</th>
+          <th>名称</th>
+          <th><button class="normal" data-bind="click: dialog.addKamoku">追加</button></th>
+      </tr></thead>
+      <tbody data-bind="foreach: categories"><tr>
+          <td data-bind="text: name, attr:{rowspan:kamokus().length+1,colspan:kamokus().length?1:0}"></td>
+      </tr><!-- ko foreach: kamokus --><tr>
+          <td class="cell-number" data-bind="text: id"></td>
+          <td class="cell-number" data-bind="text: code"></td>
+          <td data-bind="text: name"></td>
+          <td><button class="normal" data-bind="click: $parents[1].dialog.editKamoku">編集</button></td>
+      </tr><!-- /ko --></tbody>
+    </table>
+  </script>
+  <script type="text/html" id="template-kamoku-form">
+    <form data-bind="submit: $parent.saveKamoku, with: value()">
+      <div class="error" data-bind="visible: errors">入力内容に誤りがあります</div>
+      <div class="form-group">
+        <label for="kamoku_category" class="form-label">分類</label>
+        <!-- ko ifnot: id() -->
+        <select id="kamoku_category" type="text" class="form-input" data-bind="value: category, options: $parent.parent.categories, optionsText: 'name', optionsCaption: ' ', css: {error: error_for('category')}"></select>
+        <div data-bind="foreach: error_for('category')"><span class="error" data-bind="text:$data"></span><br></div>
+        <!-- /ko -->
+        <!-- ko if: id() -->
+        <span id="kamoku_category" class="form-input" data-bind="text: category().name"></span>
+        <!-- /ko -->
+      </div>
+      <div class="form-group">
+        <label for="kamoku_code" class="form-label">コード</label>
+        <input id="kamoku_code" type="text" class="form-input" data-bind="textInput: code, css: {error: error_for('code')}">
+        <div data-bind="foreach: error_for('code')"><span class="error" data-bind="text:$data"></span><br></div>
+      </div>
+      <div class="form-group">
+        <label for="kamoku_name" class="form-label">名称</label>
+        <input id="kamoku_name" type="text" class="form-input" data-bind="textInput: name, css: {error: error_for('name')}">
+        <div data-bind="foreach: error_for('name')"><span class="error" data-bind="text:$data"></span><br></div>
+      </div>
+      <span class="form-group form-submit">
+        <button type="submit" class="normal" data-bind="text: $parent.is_saving()? '保存中...': id()? '更新': '作成', disable: $parent.is_saving">&nbsp;</button>
+        <button type="button" class="normal" data-bind="visible: id, disable: $parent.is_saving, click: $parent.delKamoku">削除</button>
+      </span>
+    </form>
+  </script>
+  <script type="text/html" id="template-lists">
+    <h2>月仕訳一覧</h2>
+    <form action="javascript:void(0)">
+      <div class="form-group">
+        <button class="normal" type="button" data-bind="click: prevDate">&lt;</button>
+        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date">
+        <button class="normal" type="button" data-bind="click: loadAll">○</button>
+        <button class="normal" type="button" data-bind="click: nextDate">&gt;</button>
+      </div>
+    </form>
+    <table border="1">
+      <colgroup>
+        <col class="col-id">
+        <col class="col-date">
+        <col class="col-kamoku-desc">
+        <col class="col-amount">
+      </colgroup>
+      <thead><tr>
+          <th>ID</th>
+          <th>日付</th>
+          <th>科目/摘要</th>
+          <th>金額</th>
+          <th><button class="normal" data-bind="click: dialog.addList">新規</button></th>
+      </tr></thead>
+      <tbody><!-- ko foreach: lists --><tr data-bind="css:{initial_lists: is_initial}">
+          <td class="cell-number" data-bind="text: id"></td>
+          <td colspan="2"  data-bind="text: date"></td>
+          <td class="cell-number" data-bind="text: amount"></td>
+          <td><button class="normal" data-bind="click: $parent.dialog.editList">詳細</button></td>
+      </tr><!-- ko foreach: items --><tr data-bind="css:{initial_lists: $parent.is_initial}">
+          <td class="cell-number" data-bind="text: id"></td>
+          <td></td>
+          <td>
+            <span class="nobreak" data-bind="text: kamoku().name()"></span>
+            <span class="nobreak" data-bind="text: desc"></span>
+          </td>
+          <td class="cell-number" data-bind="text: dir()*amount()"></td>
+          <td></td>
+      </tr><!-- /ko --><!-- /ko --></tbody>
+    </table>
+  </script>
+  <script type="text/html" id="template-list-form">
+    <form data-bind="submit: saveList">
+      <div class="error" data-bind="visible: value().errors">入力内容に誤りがあります</div>
+      <div class="form-group">
+        <label for="list-date" class="form-label">日付</label>
+        <input id="list-date" type="text" class="date form-input"
+          data-bind="value: value().date, valueUpdate: 'blur', css:{error:value().error_for('date')}">
+        <div data-bind="foreach: value().error_for('date')"><span class="error" data-bind="text: $data"></span><br></div>
+      </div>
+      <table border="1" data-bind="event:{keypress:onKeyPress}">
+        <colgroup>
+          <col class="col-kamoku-code">
+          <col class="col-desc">
+          <col class="col-amount">
+          <col class="col-amount">
+        </colgroup>
+        <thead><tr>
+          </tr><tr>
+            <th>科目</th>
+            <th>摘要</th>
+            <th>借方</th>
+            <th>貸方</th>
+            <th></th>
+        </tr></thead>
+        <tbody><!-- ko foreach: items --><tr>
+            <td>
+              <select type="text" class="form-input" data-bind="value: kamoku, options: $parent.kamokus, optionsText: function(item){return item.code()+' '+item.name();}, optionsCaption: ' ', css: {error: error_for('kamoku')}"></select>
+            </td>
+            <td><input type="text" class="form-input" data-bind="textInput: desc, css:{error:error_for('desc')}, attr:{placeholder: kamoku_name, id:'item-'+$index()+'-1'}"></td>
+            <td><input type="number" class="form-number form-input" data-bind="value: kasiInput, css:{error:error_for('amount')}, attr:{id:'item-'+$index()+'-2'}"></td>
+            <td><input type="number" class="form-number form-input" data-bind="value: kariInput, css:{error:error_for('amount')}, attr:{id:'item-'+$index()+'-3'}"></td>
+            <td><button class="icon" type="button" data-bind="click: $parent.removeItem">－</button></td>
+          </tr><tr data-bind="if: errors">
+            <td colspan="5">
+              <div data-bind="foreach: error_for('kamoku')"><span class="error" data-bind="text:$data"></span><br></div>
+              <div data-bind="foreach: error_for('desc')"><span class="error" data-bind="text:$data"></span><br></div>
+              <div data-bind="foreach: error_for('amount')"><span class="error" data-bind="text:$data"></span><br></div>
+            </td>
+          </tr><!-- /ko --><tr>
+            <td class="cell-number" colspan="2">計</td>
+            <td class="cell-number" data-bind="text: value().kasiAmount, css:{error:value().error_for('amount')}"></td>
+            <td class="cell-number" data-bind="text: value().kariAmount, css:{error:value().error_for('amount')}"></td>
+            <td><button class="icon" type="button" data-bind="click: addItem">＋</button></td>
+        </tr></tbody>
+      </table>
+
+      <div data-bind="foreach: value().error_for('amount')"><span class="error" data-bind="text:$data"></span><br></div>
+      <span class="form-group form-submit">
+        <button type="submit" class="normal" data-bind="text: is_saving()? '保存中...': value().id()? '更新': '作成', disable: is_saving">&nbsp;</button>
+        <button type="button" class="normal" data-bind="visible: value().id, disable: is_saving, click: delList">削除</button>
+      </span>
+    </form>
+  </script>
+  <script type="text/html" id="template-summary">
+    <h2>月集計</h2>
+    <form action="javascript:void(0)">
+      <div class="form-group">
+        <button class="normal" type="button" data-bind="click: prevDate">&lt;</button>
+        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date">
+        <button class="normal" type="button" data-bind="click: load">○</button>
+        <button class="normal" type="button" data-bind="click: nextDate">&gt;</button>
+        &nbsp;
+        <button class="normal" type="button" data-bind="visible: ko.pureComputed(function(){return is_month_str(date());}), click: makeCarryOver">繰越仕訳の作成</button>
+      </div>
+    </form>
+    <table border="1">
+      <colgroup>
+        <col class="col-category">
+        <col class="col-kamoku">
+        <col class="col-amount">
+        <col class="col-amount">
+        <col class="col-amount">
+        <col class="col-amount">
+        <col class="col-amount">
+        <col class="col-amount">
+      </colgroup>
+      <thead><tr>
+          <th>分類</th>
+          <th>科目</th>
+          <th colspan="1">開始</th>
+          <th colspan="2">借方</th>
+          <th colspan="2">貸方</th>
+          <th colspan="1">計</th>
+      </tr></thead>
+      <tbody><!-- ko foreach: summary --><tr>
+          <td data-bind="text: kamoku().category().name()"></td>
+          <td>
+            <span data-bind="text: kamoku().code()" style="display:inline-block; width: 3em"></span>
+            <span data-bind="text: kamoku().name()" style="display:inline-block; width: 10em"></span>
+          </td>
+          <td class="cell-number" data-bind="text: initialAmount"></td>
+          <td class="cell-number" data-bind="text: kasiLeftAmount"></td>
+          <td class="cell-number" data-bind="text: kasiRightAmount"></td>
+          <td class="cell-number" data-bind="text: kariLeftAmount"></td>
+          <td class="cell-number" data-bind="text: kariRightAmount"></td>
+          <td class="cell-number" data-bind="text: finalAmount"></td>
+      </tr><!-- /ko --><tr>
+          <td colspan="2" class="cell-number">計</td>
+          <td class="cell-number" data-bind="text: initialAmount"></td>
+          <td class="cell-number" data-bind="text: kasiLeftAmount"></td>
+          <td class="cell-number" data-bind="text: kasiRightAmount"></td>
+          <td class="cell-number" data-bind="text: kariLeftAmount"></td>
+          <td class="cell-number" data-bind="text: kariRightAmount"></td>
+          <td class="cell-number" data-bind="text: finalAmount"></td>
+      </tr></tbody>
+    </table>
+  </script>
+  <script type="text/html" id="template-carryover-form">
+    <form data-bind="submit: saveList, with: value()">
+      <div class="form-group">
+        <label class="form-label">日付</label>
+        <span class="date form-input" data-bind="text: date"></span>
+      </div>
+      <table border="1">
+        <colgroup>
+          <col class="col-kamoku-code">
+          <col class="col-desc">
+          <col class="col-amount">
+          <col class="col-amount">
+        </colgroup>
+        <thead><tr>
+          </tr><tr>
+            <th>科目</th>
+            <th>摘要</th>
+            <th>借方</th>
+            <th>貸方</th>
+        </tr></thead>
+        <tbody><!-- ko foreach: items --><tr>
+            <td class="cell-number" data-bind="text: kamoku().code()"></td>
+            <td data-bind="text: desc() || kamoku().name()"></td>
+            <td class="cell-number" data-bind="text: kasiAmount()"></td>
+            <td class="cell-number" data-bind="text: kariAmount()"></td>
+          </tr><!-- /ko --><tr>
+            <td class="cell-number" colspan="2">計</td>
+            <td class="cell-number" data-bind="text: kasiAmount"></td>
+            <td class="cell-number" data-bind="text: kariAmount"></td>
+        </tr></tbody>
+      </table>
+
+      <span class="form-group form-submit">
+        <button type="submit" class="normal" data-bind="text: $parent.is_saving()? '保存中...': '作成', disable: $parent.is_saving">&nbsp;</button>
+      </span>
+    </form>
+  </script>
+  <title>家計簿</title>
+</head>
+<body onLoad="page.init()" data-bind="css:{'open-dialog':dialogManager.is_open}">
+  <div data-bind="template: tab.tabbar"></div>
+  <div id="main" data-bind="template: tab.content"></div>
+  <!-- ko template: dialogManager --><!-- /ko -->
+</body>
+</html>

@@ -1,0 +1,238 @@
+/* general */
+
+div.error {
+  margin-bottom: 0.2em;
+  padding: 0.4em;
+  border: 1px solid #f77;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #f77;
+}
+
+span.error {
+  color: #f44;
+}
+
+select.error > option {
+  background-color: #fff;
+}
+
+td.error, input.error, select.error {
+  background-color: #f99;
+}
+
+button.normal {
+  background-color: #e6e6e6;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+button.icon {
+  background-color: #e6e6e6;
+  padding: 0 0 0 0;
+  width: 1.6em;
+  height: 1.6em;
+  overflow: hidden;
+  border: 1px solid #333;
+  border-radius: 0.8em;
+}
+
+span.nobreak {
+  display: inline-block;
+}
+
+#main {
+  margin: 1em;
+}
+
+/* tab */
+.tab-bar {
+  margin: 1em 0 1em -10px;
+  padding: 0 20px;
+  border-bottom: 2px solid #f80;
+  line-height: 0;
+}
+.tab-bar input {
+  position: absolute;
+  opacity: 0;
+}
+.tab-bar label {
+  display: inline-block;
+  cursor: pointer;
+  margin: -1px 0;
+  padding: 4px 10px 0 10px;
+  color: #555;
+  background: #f4f4f4;
+  border: 1px solid #bbb;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom: 1px solid #f80;
+  line-height: 1.7em;
+}
+
+.tab-bar label.selected {
+  margin: -2px 0;
+  color: #000;
+  background: #fff;
+  border: 1px solid #f80;
+  border-bottom: 2px solid #fff;
+}
+
+/* table */
+
+table {
+  border-collapse: collapse;
+  border: 0 none #fff;
+}
+table th, table td {
+  padding: 4px 8px;
+  border: 1px solid #f80;
+}
+table th[colspan] {
+  text-align: center;
+}
+table tr:last-child th {
+  border-bottom-width: 3px;
+}
+
+table td.cell-number {
+  text-align: right;
+}
+
+table .col-id {
+  width: 2em;
+}
+table .col-category {
+  width: 5em;
+}
+table .col-kamoku {
+  width: 15em;
+}
+table .col-kamoku-code {
+  width: 5em;
+}
+table .col-kamoku-name {
+  width: 12em;
+}
+table .col-kamoku-desc {
+  width: 18em;
+}
+table .col-date {
+  width: 8em;
+}
+table .col-amount {
+  width: 6em;
+}
+table .col-desc {
+  width: 12em;
+}
+
+/* form */
+
+form .form-group {
+  margin-bottom: 0.3em;
+}
+
+form .form-label {
+  display: inline-block;
+  width: 5em;
+  text-align: right;
+}
+
+form .form-input {
+  display: inline-block;
+  width: 10em;
+  margin: 0 4px;
+  padding: 4px 5px;
+}
+form .date.form-input {
+  width: 7em;
+}
+form input.form-input, form select.form-input {
+  border-top: 0px none #000;
+  border-left: 0px none #000;
+  border-right: 0px none #000;
+  border-bottom: 2px solid #000;
+}
+form span.form-input {
+  border: 0px none #000;
+}
+
+form .form-number {
+  text-align: right;
+}
+
+form table .form-input {
+  display: inline;
+  width: 100%;
+}
+
+form .form-submit {
+  display: inline-block;
+  margin-left: 5em;
+}
+
+/* dialog */
+
+body.open-dialog {
+  overflow: hidden;
+}
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 99;
+  text-align: center;
+  overflow: auto;
+}
+
+.dialog-overlay:before {
+  display: inline-block;
+  overflow: hidden;
+  width: 0;
+  height: 100%;
+  vertical-align: middle;
+  content: "";
+}
+
+.dialog-overlay .dialog {
+  display: inline-block;
+  position: relative;
+  background: #fff;
+  z-index: 99;
+  margin: 1.4em;
+  min-width: 14em;
+  min-height: 6em;
+  white-space: normal;
+  vertical-align: middle;
+  text-align: left;
+  border: 1px solid #fc4;
+}
+
+.dialog-overlay .dialog-title {
+  border-bottom: 2px solid #f80;
+  padding: 0.8em 1.2em;
+}
+
+.dialog-overlay .dialog-close {
+  background: #fff;
+  float: right;
+  margin-left: 0.8em;
+}
+
+.dialog-overlay .dialog-body {
+  overflow: auto;
+  padding: 0.6em;
+}
+
+/* transition */
+.left-out {
+  transition: margin-left 1s linear 0s;
+  margin-left: -100%;
+  position: absolute;
+  background-color: #fff;
+}

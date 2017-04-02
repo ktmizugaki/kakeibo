@@ -1,0 +1,5 @@
+perl5/
+tmp/
+log/
+kakeibo.db
+kakeibo.db-journal

@@ -18,7 +18,10 @@ var page = (function(_global) {
     init: function page_init() {
       if (initial) {
         ko.applyBindings(data, document.body);
-        data.tab.selected.subscribe(function(tab) { if (tab) params.path(tab); });
+        data.tab.selected.subscribe(function(tab) {
+          if (tab) params.path(tab);
+          page.setTitleInfo();
+        });
         params.path.subscribe(function(path) { tab.setSelected(path); });
       }
       initial = false;
@@ -34,5 +37,9 @@ var page = (function(_global) {
         alert("データのロードエラーです");
       });
     },
+    setTitleInfo: function(info) {
+      var tabName = tab.current().label;
+      document.title = tabName + (info? "#"+info:"") + ' - ' + '家計簿';
+    }
   };
 })(this);

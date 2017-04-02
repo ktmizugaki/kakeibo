@@ -363,6 +363,7 @@ function ListManager(tabbar, dialogManager, kamokuManager, date) {
       });
       self.lists(lists);
       self.lists.sort(compareListByDate);
+      page.setTitleInfo(self.date());
     });
   };
 
@@ -613,6 +614,7 @@ function SummaryManager(tabbar, dialogManager, kamokuManager, date) {
       });
       self.summary(array);
       self.summary.sort(compareSummaryItem);
+      page.setTitleInfo(self.date());
     });
     if (!item.kamoku) {
       item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);

@@ -13,6 +13,7 @@ resources("/categories", {controller=>"Category"});
 resources("/kamokus", {controller=>"Kamoku"});
 resources("/lists", {controller=>"List"});
 get "/summary/{date}", {date=>qr/^[0-9]{4}-[0-9]{2}(?:-[0-9]{2})?$/, controller=>"Summary", action=>'summary'};
+get "/items/search", {controller=>"Item", action=>'search'};
 
 sub json_api {
     my $env = shift;

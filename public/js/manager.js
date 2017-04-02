@@ -703,3 +703,55 @@ function SummaryManager(tabbar, dialogManager, kamokuManager, date) {
     });
   };
 }
+
+function ByKamokuManager(tabbar, dialogManager, kamokuManager, date) {
+  var self = this;
+  self.tabInfo = {label:"科目別",template:"template-bykamoku",data:self};
+  self.search = new ByKamoku({
+    date_from: date() || month2str(new Date()),
+    date_to: date() || month2str(new Date()),
+    kamoku_id: params.get("kamoku_id"),
+  });
+  self.search.kamokus = kamokuManager.kamokus;
+  self.search.kamoku = kamokuManager.computedKamoku(self.search.kamoku_id);
+  self.items = ko.observableArray();
+  function compareItemByDate(a,b) {
+    if (a.date() < b.date()) return -1;
+    if (a.date() > b.date()) return 1;
+    return a.id() - b.id();
+  }
+  self.load = function() {
+    var q = self.search.toParams();
+    var errors = null;
+    if (!is_month_str(q.date_from)) {
+      errors = errors || {};
+      errors['date_from'] = ["format month"];
+    }
+    if (!is_month_str(q.date_to)) {
+      errors = errors || {};
+      errors['date_to'] = ["format month"];
+    }
+    if (!q.kamoku_id) {
+      errors = errors || {};
+      errors['kamoku_id'] = ["is required"];
+    }
+    self.search.errors(errors);
+    if (errors) {
+      return;
+    }
+    self.items([]);
+    params.set("kamoku_id", q.kamoku_id);
+    return Promise.all([Item.search(q)]).then(function(res){
+      var items = res[0]();
+      var sum = 0;
+      items.sort(compareItemByDate);
+      items.forEach(function(item) {
+        sum += (item.dir()*item.amount()) || 0;
+        item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+        item.sum = sum;
+      });
+      self.items(items);
+      page.setTitleInfo(self.kamoku()? self.kamoku().name(): "");
+    });
+  };
+}

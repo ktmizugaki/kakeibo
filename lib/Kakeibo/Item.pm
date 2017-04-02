@@ -13,6 +13,8 @@ my $delete_item = prepare("delete from items where list_id = ? and id = ?");
 my $has_list = prepare("select count(*) from lists where id = ?");
 my $has_kamoku = prepare("select count(*) from kamokus where id = ?");
 
+my $select_items_by_kamoku = prepare("select items.id,lists.date,items.list_id,items.kamoku_id,items.dir,items.amount,items.desc from items join lists on lists.id = items.list_id where is_initial = 0 and date between ? and ? and kamoku_id = ?");
+
 my $validator = Kakeibo::Lib::Validator->new(
     list_id => {required => 1, presence => $has_list},
     kamoku_id => {required => 1, presence => $has_kamoku},
@@ -55,5 +57,29 @@ sub save {
 }
 
 ### Controller methods
+
+sub search {
+    my $req = shift;
+    my $date_from = $req->parameters->{date_from} || "9999-99-99";
+    my $date_to = $req->parameters->{date_to} || "0000-00-00";
+    my $kamoku_id = $req->parameters->{kamoku_id} || "";
+    my ($ret, $ret2);
+    if ($date_from =~ /^[0-9]{4}-[0-9]{2}$/) {
+        $date_from .= "-00";
+    }
+    if ($date_to =~ /^[0-9]{4}-[0-9]{2}$/) {
+        $date_to .= "-99";
+    }
+    if ($date_from !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) {
+        return undef;
+    }
+    if ($date_to !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) {
+        return undef;
+    }
+    if ($kamoku_id !~ /^[0-9]+$/) {
+        return undef;
+    }
+    return all($select_items_by_kamoku, $date_from, $date_to, $kamoku_id);
+}
 
 1;

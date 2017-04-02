@@ -4,10 +4,11 @@ var page = (function(_global) {
   var dialogManager = koDialogManager({});
   var date = ko.observable(params.get("date") || month2str(new Date()));
   date.subscribe(function(date) { params.set("date", date); });
-  params.query.subscribe(function() { date(params.get("date")); });
+  params.query.subscribe(function() { var d = params.get("date"); if (d) date(d); });
   var kamokus = new KamokuManager(tab, dialogManager);
   var lists = new ListManager(tab, dialogManager, kamokus, date);
   var summary = new SummaryManager(tab, dialogManager, kamokus, date);
+  var bykamoku = new ByKamokuManager(tab, dialogManager, kamokus, date);
   var data = {
     tab: tab,
     dialogManager: dialogManager,
@@ -30,6 +31,7 @@ var page = (function(_global) {
         data.tab.addTab(ko.utils.extend(kamokus.tabInfo, {name:"kamokus"}));
         data.tab.addTab(ko.utils.extend(lists.tabInfo, {name:"lists"}));
         data.tab.addTab(ko.utils.extend(summary.tabInfo, {name:"summary"}));
+        data.tab.addTab(ko.utils.extend(bykamoku.tabInfo, {name:"bykamoku"}));
         if (!data.tab.setSelected(params.path())) {
           data.tab.selected("kamokus");
         }

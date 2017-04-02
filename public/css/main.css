@@ -148,6 +148,9 @@ form .form-input {
 form .date.form-input {
   width: 7em;
 }
+form .kamoku.form-input {
+  width: 15em;
+}
 form input.form-input, form select.form-input {
   border-top: 0px none #000;
   border-left: 0px none #000;

@@ -267,3 +267,11 @@ Summary.prototype.finalAmount = function() {
 Summary.prototype.toString = function() {
   return "<集計: "+this.kamoku_id()+":"+this.kasiAmount()+","+this.kariAmount()+">";
 };
+
+function ByKamoku(raw) {
+  Model.call(this, raw);
+  raw = ko.utils.extend({date_from:null, date_to:null, kamoku_id:null}, raw);
+  ko.mapping.fromJS(raw, ByKamoku.mapping, this);
+}
+ByKamoku.inherits = Model.inherits;
+ByKamoku.inherits(Model);

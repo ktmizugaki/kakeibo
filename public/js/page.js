@@ -6,6 +6,7 @@ var page = (function(_global) {
   date.subscribe(function(date) { params.set("date", date); });
   params.query.subscribe(function() { var d = params.get("date"); if (d) date(d); });
   var kamokus = new KamokuManager(tab, dialogManager);
+  var tmpls = new TmplManager(tab, dialogManager, kamokus);
   var lists = new ListManager(tab, dialogManager, kamokus, date);
   var summary = new SummaryManager(tab, dialogManager, kamokus, date);
   var bykamoku = new ByKamokuManager(tab, dialogManager, kamokus, date);
@@ -27,8 +28,9 @@ var page = (function(_global) {
       }
       initial = false;
       data.tab.selected(null);
-      Promise.all([kamokus.loadAll()]).then(function(res){
+      Promise.all([kamokus.loadAll(), tmpls.loadAll()]).then(function(res){
         data.tab.addTab(ko.utils.extend(kamokus.tabInfo, {name:"kamokus"}));
+        data.tab.addTab(ko.utils.extend(tmpls.tabInfo, {name:"tmpls"}));
         data.tab.addTab(ko.utils.extend(lists.tabInfo, {name:"lists"}));
         data.tab.addTab(ko.utils.extend(summary.tabInfo, {name:"summary"}));
         data.tab.addTab(ko.utils.extend(bykamoku.tabInfo, {name:"bykamoku"}));

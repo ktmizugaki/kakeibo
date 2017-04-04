@@ -117,6 +117,12 @@ table .col-kamoku-name {
 table .col-kamoku-desc {
   width: 18em;
 }
+table .col-tmpl-name {
+  width: 8em;
+}
+table .col-tmpl-desc {
+  width: 20em;
+}
 table .col-date {
   width: 8em;
 }
@@ -147,6 +153,9 @@ form .form-input {
 }
 form .date.form-input {
   width: 7em;
+}
+form .desc.form-input {
+  width: 15em;
 }
 form .kamoku.form-input {
   width: 15em;

@@ -218,6 +218,251 @@ function KamokuManager(tabbar, dialogManager) {
   };
 }
 
+function TmplManager(tabbar, dialogManager, kamokuManager) {
+  var self = this;
+  self.tabInfo = {label:"ひな型",template:"template-tmpls",data:self};
+  self.tmpls = ko.observableArray();
+  function compareTmplByName(a,b) {
+    if (a.name() < b.name()) return -1;
+    if (a.name() > b.name()) return 1;
+    return a.id() - b.id();
+  }
+  var dialog = self.dialog = {
+    template:"template-tmpl-form",
+    id: "tmpl-dialog",
+    kamokus: kamokuManager.kamokus,
+    is_saving: ko.observable(false),
+    value: ko.observable(null),
+    list: ko.observable(null),
+    edit: null,
+  };
+  dialog.data = dialog;
+  dialog.title = ko.pureComputed(function() {
+    var value = dialog.value();
+    return value? value.id()? "ひな型の更新": "ひな型の追加": null;
+  });
+  dialog.onDialogOpen = function(handle, element) {
+    element.querySelector("select, input").focus();
+  };
+  dialog.onDialogClose = function(handle) {
+    if (dialog.handle != handle) {
+      return;
+    }
+    dialog.is_saving(false);
+    dialog.value(null);
+    dialog.list(null);
+    dialog.edit = null;
+    dialog.handle = null;
+  };
+  dialog.items = ko.computed(function() {
+    var list = dialog.list();
+    if (!list) return [];
+    return list.items().map(function(item) {
+      if (!item.kamoku_code) {
+        item.kamoku_code = kamokuManager.computedKamokuCode(item.kamoku_id);
+      }
+      if (!item.kamoku) {
+        item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+      }
+      if (!item.kamoku_name) {
+        item.kamoku_name = ko.computed(function() {
+          return this.kamoku() && this.kamoku().name();
+        }, item);
+      }
+      if (!item.kasiInput) {
+        item.kasiInput = self.computedAmountInput(item, -1);
+      }
+      if (!item.kariInput) {
+        item.kariInput = self.computedAmountInput(item, 1);
+      }
+      return item;
+    });
+  });
+  self.computedAmountInput = function(item, dir) {
+    return ko.pureComputed({
+      read: function() {
+        var amount = item.amount();
+        return item.dir() == dir? amount: null;
+      },
+      write: function(amount) {
+        if (amount == "") {
+          if (item.dir() == dir) {
+            item.dir(null);
+            item.amount(null);
+          }
+          return;
+        }
+        var lastDir = item.dir.peek();
+        var lastAmount = item.amount.peek() || 0;
+        amount = parseInt(amount) || 0;
+        if (lastDir == null) {
+          item.dir(dir);
+          item.amount(amount);
+        } else if (lastDir == dir) {
+          if (amount != lastAmount) {
+            item.amount(amount);
+          }
+        } else {
+          if (lastAmount > amount) {
+            item.amount(lastAmount - amount);
+          } else if (lastAmount == amount) {
+            item.dir(null);
+            item.amount(null);
+          } else {
+            item.dir(dir);
+            item.amount(amount - lastAmount);
+          }
+        }
+      },
+      owner: item
+    }).extend({notify:'always'});
+  };
+
+  self.loadAll = function() {
+    self.tmpls([]);
+    return Promise.all([Template.all()]).then(function(res){
+      var tmpls = res[0]();
+      self.tmpls(tmpls);
+      self.tmpls.sort(compareTmplByName);
+    });
+  };
+
+  dialog.onKeyPress = function($data, event) {
+    var items = dialog.list().items;
+    var elem = event.target;
+    if ((""+elem.id).indexOf("item-") != 0) return true;
+    var $context = ko.contextFor(elem);
+    var index = $context.$index(), length = items().length;
+    var id = event.target.id.split(/-/);
+    id[1] = +id[1];
+    id[2] = +id[2];
+    if (event.isComposing !== true && event.repeat !== true && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      var key = event.key || event.keyCode;
+      if (key == 'Enter' || key == 13) {
+        event.preventDefault();
+        event.stopPropagation();
+        elem.blur();
+        elem.focus();
+        id[1]++;
+        id[2] = 0;
+        if (id[1] == length) {
+          items.push(new Item());
+        }
+        ko.tasks.runEarly();
+      } else if (key == 'ArrowUp' || key == 'Up' || key == 38) {
+        if (id[1] == 0) return true;
+        id[1]--;
+      } else if (key == 'ArrowDown' || key == 'Down' || key == 40) {
+        if (id[1] == length-1) return true;
+        id[1]++;
+      } else if (key == 'ArrowLeft' || key == 'Left' || key == 37) {
+        if (elem.selectionStart != elem.selectionEnd || elem.selectionStart != 0) return true;
+        if (id[2] == 0) return true;
+        id[2]--;
+      } else if (key == 'ArrowRight' || key == 'Right' || key == 39) {
+        if (elem.selectionStart != elem.selectionEnd || elem.selectionEnd != elem.value.length) return true;
+        id[2]++;
+      } else {
+        return true;
+      }
+      setTimeout(function() {
+        elem = document.getElementById(id.join("-"));
+        if (elem) {
+          elem.focus();
+        }
+      }, 0);
+    } else {
+      return true;
+    }
+    return false;
+  };
+  function openTmpl(tmpl) {
+    var handle = dialogManager.open(dialog);
+    if (!handle) {
+      return false;
+    }
+    dialog.handle = handle;
+    var value = new Template(tmpl&&tmpl.toObject());
+    dialog.is_saving(false);
+    dialog.value(value);
+    dialog.list(new List({items:value.json()}));
+    dialog.edit = tmpl;
+    return true;
+  }
+  function closeTmpl() {
+    if (dialog.handle) {
+      dialogManager.close(dialog.handle);
+    }
+  }
+  dialog.closeTmpl = closeTmpl;
+  dialog.addTmpl = function() { return openTmpl(); };
+  dialog.editTmpl = function() { return openTmpl(this); };
+  dialog.saveTmpl = function() {
+    var value = dialog.value();
+    var list = dialog.list();
+    var edit = dialog.edit;
+    if (!value) return;
+    dialog.is_saving(true);
+    value.json(list.toParams().items);
+    value.save().then(function(tmpl) {
+      if (edit) {
+        edit.assign(tmpl.toObject());
+      } else {
+        self.tmpls.push(tmpl);
+      }
+      self.tmpls.sort(compareTmplByName);
+      if (value == dialog.value()) {
+        dialog.is_saving(false);
+        closeTmpl();
+      }
+    }).catch(function(err) {
+      if (value != dialog.value()) return;
+      dialog.is_saving(false);
+      if (err.errors) {
+      } else {
+        alert("エラーが発生しました");
+      }
+    });
+  };
+  dialog.delTmpl = function() {
+    var value = dialog.value();
+    var edit = dialog.edit;
+    if (!edit || !edit.id()) return;
+    if (!confirm("ひな型「"+value.name()+"」を削除しますか？")) {
+      return;
+    }
+    dialog.is_saving(true);
+    edit.destroy().then(function(tmpl) {
+      self.tmpls.remove(edit);
+      if (value != dialog.value()) return;
+      dialog.is_saving(false);
+      closeTmpl();
+    }).catch(function(err) {
+      if (value != dialog.value()) return;
+      dialog.is_saving(false);
+      if (err.errors) {
+      } else if (err && err.status == 404) {
+        self.tmpls.remove(edit);
+        closeTmpl();
+      } else {
+        alert("エラーが発生しました");
+      }
+    });
+  };
+  dialog.addItem = function() {
+    var list = dialog.list();
+    if (list) {
+      list.items.push(new Item());
+    }
+  };
+  dialog.removeItem = function($data) {
+    var list = dialog.list();
+    if (list) {
+      list.items.remove($data);
+    }
+  };
+}
+
 function ListManager(tabbar, dialogManager, kamokuManager, date) {
   var self = this;
   self.tabInfo = {label:"月仕訳一覧",template:"template-lists",data:self};

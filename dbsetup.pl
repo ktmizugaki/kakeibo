@@ -43,6 +43,13 @@ CREATE TABLE items(
     amount INTEGER,
     desc TEXT);
 EOS
+$dbh->do(<<EOS);
+CREATE TABLE templates(
+    id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE,
+    desc TEXT,
+    text TEXT);
+EOS
 $dbh->commit();
 $dbh->begin_work();
 my @initial = (

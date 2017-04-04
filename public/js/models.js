@@ -157,6 +157,30 @@ Kamoku.prototype.toString = function() {
   return "<勘定科目: "+this.code()+":"+this.name()+">";
 };
 
+function Template(raw) {
+  Model.call(this, raw);
+  raw = ko.utils.extend({name:null, desc:null, text:"[]"}, raw);
+  ko.mapping.fromJS(raw, Template.mapping, this);
+  this.json = ko.pureComputed(this.json, this);
+}
+Template.path = "/templates";
+Template.mapping = {
+};
+Template.array_mapping = {
+  create: function(opts) { return new Template(opts.data); },
+};
+Template.error_aliases = {
+};
+Template.inherits = Model.inherits;
+Template.inherits(Model);
+Template.prototype.json = {
+  read: function() { try { return JSON.parse(this.text()); }catch(e){ return []; } },
+  write: function(json) { return this.text(JSON.stringify(json)); }
+};
+Template.prototype.toString = function() {
+  return "<ひな型: "+this.name()+","+this.desc()+">";
+};
+
 function List(raw) {
   Model.call(this, raw);
   raw = ko.utils.extend({date:raw?null:date2str(new Date()), amount:null, is_initial:false, items: []}, raw);

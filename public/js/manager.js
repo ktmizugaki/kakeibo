@@ -463,7 +463,7 @@ function TmplManager(tabbar, dialogManager, kamokuManager) {
   };
 }
 
-function ListManager(tabbar, dialogManager, kamokuManager, date) {
+function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
   var self = this;
   self.tabInfo = {label:"月仕訳一覧",template:"template-lists",data:self};
   self.tabInfo.onChange = function(tab, selected, name) {
@@ -486,6 +486,8 @@ function ListManager(tabbar, dialogManager, kamokuManager, date) {
     is_saving: ko.observable(false),
     value: ko.observable(null),
     edit: null,
+    tmpl: ko.observable(null),
+    tmpls: tmplManager.tmpls,
   };
   dialog.data = dialog;
   dialog.title = ko.pureComputed(function() {
@@ -503,6 +505,7 @@ function ListManager(tabbar, dialogManager, kamokuManager, date) {
     dialog.value(null);
     dialog.edit = null;
     dialog.handle = null;
+    closeToTmpl();
   };
   dialog.items = ko.computed(function() {
     var list = dialog.value();
@@ -573,6 +576,21 @@ function ListManager(tabbar, dialogManager, kamokuManager, date) {
       owner: item
     }).extend({notify:'always'});
   };
+  dialog.tmpl.subscribe(function(tmpl) {
+    if (!tmpl) return;
+    var list = dialog.value();
+    var items = tmpl.json();
+    if (items && items.length) {
+      items.forEach(function(item, index) {
+        if (list.items()[index]) {
+          list.items()[index].assign(item);
+        } else {
+          list.items.push(new Item(item));
+        }
+      });
+    }
+    dialog.tmpl(null);
+  });
 
   function compareListByDate(a,b) {
     if (a.date() < b.date()) return -1;
@@ -753,6 +771,72 @@ function ListManager(tabbar, dialogManager, kamokuManager, date) {
     if (value) {
       value.items.remove($data);
     }
+  };
+  dialog.openToTmpl = function() {
+    if (!dialog.value()) {
+      return;
+    }
+    var handle = dialogManager.open(subdialog);
+    if (!handle) {
+      return;
+    }
+    subdialog.handle = handle;
+    subdialog.value(new Template());
+    subdialog.list = dialog.value().toParams();
+  };
+  function closeToTmpl() {
+    if (subdialog.handle) {
+      dialogManager.close(subdialog.handle);
+    }
+  }
+  var subdialog = {
+    template:"template-list2tmpl-form",
+    id: "to-tmpl-dialog",
+    is_saving: ko.observable(false),
+    value: ko.observable(null),
+    list: null
+  };
+  subdialog.data = subdialog;
+  subdialog.title = ko.observable("ひな型として保存");
+  subdialog.onDialogOpen = function(handle, element) {
+    element.querySelector("select, input").focus();
+  };
+  subdialog.onDialogClose = function(handle) {
+    if (dialog.handle != handle) {
+      return;
+    }
+    subdialog.is_saving(false);
+    subdialog.value(null);
+    subdialog.list = null;
+    subdialog.handle = null;
+  };
+  subdialog.saveAsTmpl = function() {
+    var value = subdialog.value();
+    var list = subdialog.list;
+    if (!value) return;
+    subdialog.is_saving(true);
+    if (list.items) {
+      list.items.forEach(function(item) {
+        delete item.list_id;
+        delete item.dir;
+        delete item.amount;
+      });
+      value.json(list.items);
+    }
+    value.save().then(function(tmpl) {
+      if (value == subdialog.value()) {
+        subdialog.is_saving(false);
+        closeToTmpl();
+        tmplManager.tmpls.push(tmpl);
+      }
+    }).catch(function(err) {
+      if (value != subdialog.value()) return;
+      subdialog.is_saving(false);
+      if (err.errors) {
+      } else {
+        alert("エラーが発生しました");
+      }
+    });
   };
 }
 

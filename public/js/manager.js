@@ -245,7 +245,7 @@ function ListManager(tabbar, dialogManager, kamokuManager, date) {
   dialog.data = dialog;
   dialog.title = ko.pureComputed(function() {
     var value = dialog.value();
-    return value? value.id()? "仕訳の作成": "仕訳の詳細": null;
+    return value? value.id()? "仕訳の詳細": "仕訳の作成": null;
   });
   dialog.onDialogOpen = function(handle, element) {
     element.querySelector("select, input").focus();

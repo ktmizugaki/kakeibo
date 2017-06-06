@@ -221,7 +221,7 @@
         </tr></thead>
         <tbody><!-- ko foreach: items --><tr>
             <td>
-              <select type="text" class="form-input" data-bind="value: kamoku, options: $parent.kamokus, optionsText: function(item){return item.code()+' '+item.name();}, optionsCaption: ' ', css: {error: error_for('kamoku')}"></select>
+              <select type="text" class="form-input" data-bind="value: kamoku, options: $parent.kamokus, optionsText: function(item){return item.code()+' '+item.name();}, optionsCaption: ' ', css: {error: error_for('kamoku')}, attr: {id:'item-'+$index()+'-0'}"></select>
             </td>
             <td><input type="text" class="form-input" data-bind="textInput: desc, css:{error:error_for('desc')}, attr:{placeholder: kamoku_name, id:'item-'+$index()+'-1'}"></td>
             <td><input type="number" class="form-number form-input" data-bind="value: kasiInput, css:{error:error_for('amount')}, attr:{id:'item-'+$index()+'-2'}"></td>

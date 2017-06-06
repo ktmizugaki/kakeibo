@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ $UID = 0 ] && USER=nginx
+[ $UID = 0 ] && USER=nginx && RUN_AS="su $USER -s"
 PID=tmp/app.pid
 : ${PLAC_ENV:=development}
 
@@ -52,7 +52,7 @@ do_start() {
     touch $DBFILE-journal
     chown $USER:$USER $DBFILE-journal || die "cannot change owner of $dbfile-jounral to $USER"
     echo "Starting server"
-    exec su $USER -s /bin/bash -c 'eval $(perl -Mlocal::lib=perl5);
+    exec $RUN_AS /bin/bash -c 'eval $(perl -Mlocal::lib=perl5);
 exec plackup '"$OPTIONS"' >>log/plackup.stdout.log 2>>log/plackup.stderr.log'
 }
 

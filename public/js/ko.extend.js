@@ -189,7 +189,9 @@ koDialogManager.tabId = 0;
 koDialogManager.methods = {
   onKeyDown: function(event) {
     var ds = this.dialogs();
-    return !(ds.length && event.which == 27 && this.close(ds[ds.length-1]));
+    /* to allow closing dropdown by escape key */
+    var is_select = event.target.tagName == "SELECT";
+    return !(ds.length && event.which == 27 && !is_select && this.close(ds[ds.length-1]));
   },
   onClickOverlay: function(data, event) {
     var targetClass = " "+event.target.className+" ";

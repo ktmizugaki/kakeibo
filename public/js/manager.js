@@ -328,52 +328,49 @@ function TmplManager(tabbar, dialogManager, kamokuManager) {
   };
 
   dialog.onKeyPress = function($data, event) {
+    var key = event.key || event.keyCode;
+    var mod = (event.ctrlKey<<0)|(event.shiftKey<<1)|(event.altKey<<2);
     var items = dialog.list().items;
     var elem = event.target;
     if ((""+elem.id).indexOf("item-") != 0) return true;
     var $context = ko.contextFor(elem);
     var index = $context.$index(), length = items().length;
-    var id = event.target.id.split(/-/);
+    var id = (""+elem.id).split(/-/);
     id[1] = +id[1];
     id[2] = +id[2];
-    if (event.isComposing !== true && event.repeat !== true && !event.ctrlKey && !event.shiftKey && !event.altKey) {
-      var key = event.key || event.keyCode;
-      if (key == 'Enter' || key == 13) {
-        event.preventDefault();
-        event.stopPropagation();
-        elem.blur();
-        elem.focus();
+    if (event.isComposing === true || event.repeat === true) {
+      return true;
+    }
+    if (key == 'Enter' || key == 13) {
+      if (mod == 1) {
         id[1]++;
         id[2] = 0;
         if (id[1] == length) {
           items.push(new Item());
         }
         ko.tasks.runEarly();
-      } else if (key == 'ArrowUp' || key == 'Up' || key == 38) {
-        if (id[1] == 0) return true;
+      } else if (mod == 2) {
+        if (id[1] == 0) return false;
         id[1]--;
-      } else if (key == 'ArrowDown' || key == 'Down' || key == 40) {
-        if (id[1] == length-1) return true;
+      } else if (mod == 0) {
+        if (id[1] == length-1) return false;
         id[1]++;
-      } else if (key == 'ArrowLeft' || key == 'Left' || key == 37) {
-        if (elem.selectionStart != elem.selectionEnd || elem.selectionStart != 0) return true;
-        if (id[2] == 0) return true;
-        id[2]--;
-      } else if (key == 'ArrowRight' || key == 'Right' || key == 39) {
-        if (elem.selectionStart != elem.selectionEnd || elem.selectionEnd != elem.value.length) return true;
-        id[2]++;
       } else {
         return true;
       }
-      setTimeout(function() {
-        elem = document.getElementById(id.join("-"));
-        if (elem) {
-          elem.focus();
-        }
-      }, 0);
     } else {
       return true;
     }
+    event.preventDefault();
+    event.stopPropagation();
+    elem.blur();
+    elem.focus();
+    setTimeout(function() {
+      elem = document.getElementById(id.join("-"));
+      if (elem) {
+        elem.focus();
+      }
+    }, 0);
     return false;
   };
   function openTmpl(tmpl) {
@@ -631,52 +628,49 @@ function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
   };
 
   dialog.onKeyPress = function($data, event) {
+    var key = event.key || event.keyCode;
+    var mod = (event.ctrlKey<<0)|(event.shiftKey<<1)|(event.altKey<<2);
     var items = dialog.value().items;
     var elem = event.target;
     if ((""+elem.id).indexOf("item-") != 0) return true;
     var $context = ko.contextFor(elem);
-    var index = $context.$index(), length = dialog.items().length;
-    var id = event.target.id.split(/-/);
+    var index = $context.$index(), length = items().length;
+    var id = (""+elem.id).split(/-/);
     id[1] = +id[1];
     id[2] = +id[2];
-    if (event.isComposing !== true && event.repeat !== true && !event.ctrlKey && !event.shiftKey && !event.altKey) {
-      var key = event.key || event.keyCode;
-      if (key == 'Enter' || key == 13) {
-        event.preventDefault();
-        event.stopPropagation();
-        elem.blur();
-        elem.focus();
+    if (event.isComposing === true || event.repeat === true) {
+      return true;
+    }
+    if (key == 'Enter' || key == 13) {
+      if (mod == 1) {
         id[1]++;
         id[2] = 0;
         if (id[1] == length) {
           items.push(new Item());
         }
         ko.tasks.runEarly();
-      } else if (key == 'ArrowUp' || key == 'Up' || key == 38) {
-        if (id[1] == 0) return true;
+      } else if (mod == 2) {
+        if (id[1] == 0) return false;
         id[1]--;
-      } else if (key == 'ArrowDown' || key == 'Down' || key == 40) {
-        if (id[1] == length-1) return true;
+      } else if (mod == 0) {
+        if (id[1] == length-1) return false;
         id[1]++;
-      } else if (key == 'ArrowLeft' || key == 'Left' || key == 37) {
-        if (elem.selectionStart != elem.selectionEnd || elem.selectionStart != 0) return true;
-        if (id[2] == 0) return true;
-        id[2]--;
-      } else if (key == 'ArrowRight' || key == 'Right' || key == 39) {
-        if (elem.selectionStart != elem.selectionEnd || elem.selectionEnd != elem.value.length) return true;
-        id[2]++;
       } else {
         return true;
       }
-      setTimeout(function() {
-        elem = document.getElementById(id.join("-"));
-        if (elem) {
-          elem.focus();
-        }
-      }, 0);
     } else {
       return true;
     }
+    event.preventDefault();
+    event.stopPropagation();
+    elem.blur();
+    elem.focus();
+    setTimeout(function() {
+      elem = document.getElementById(id.join("-"));
+      if (elem) {
+        elem.focus();
+      }
+    }, 0);
     return false;
   };
   function openList(list) {

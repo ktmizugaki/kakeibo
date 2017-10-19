@@ -105,18 +105,25 @@ var params = (function(_global) {
       query.push([name, value]);
     },
     set: function(name, value) {
-      var initial = true;
+      var initial = true, notify = false;
       query.remove(function(p) {
-        if (initial && p[0] == name) {
-          initial = false;
-          p[1] = value;
+        if (p[0] == name) {
+          if (initial) {
+            initial = false;
+            notify = p[1] == value;
+            p[1] = value;
+            return false;
+          } else {
+            notify = false;
+            return true;
+          }
+        } else {
           return false;
         }
-        return p[0] == name;
       });
       if (initial) {
         query.push([name, value]);
-      } else {
+      } else if (notify) {
         query.notifySubscribers(query());
       }
     },

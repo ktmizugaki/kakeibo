@@ -4,7 +4,7 @@ var page = (function(_global) {
   var dialogManager = koDialogManager({});
   var date = ko.observable(params.get("date") || month2str(new Date()));
   date.subscribe(function(date) { params.set("date", date); });
-  params.query.subscribe(function() { var d = params.get("date"); if (d) date(d); });
+  params.query.extend({rateLimit:10}).subscribe(function() { var d = params.get("date"); if (d) date(d); });
   var kamokus = new KamokuManager(tab, dialogManager);
   var tmpls = new TmplManager(tab, dialogManager, kamokus);
   var lists = new ListManager(tab, dialogManager, kamokus, tmpls, date);

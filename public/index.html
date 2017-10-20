@@ -395,7 +395,7 @@
           <th>金額</th>
           <th>累計</th>
       </tr></thead>
-      <tbody data-bind="foreach: items"><tr>
+      <tbody data-bind="foreach: items"><tr data-bind="css:{initial_lists: $data.is_initial}">
           <td class="cell-number" data-bind="text: id"></td>
           <td data-bind="text: date"></td>
           <td>

@@ -14,8 +14,10 @@ resources("/categories", {controller=>"Category"});
 resources("/kamokus", {controller=>"Kamoku"});
 resources("/templates", {controller=>"Template"});
 resources("/lists", {controller=>"List"});
+get "/lists/initial", {controller=>"List", action=>'initial'};
 get "/summary/{date}", {date=>qr/^[0-9]{4}-[0-9]{2}(?:-[0-9]{2})?$/, controller=>"Summary", action=>'summary'};
 get "/items/search", {controller=>"Item", action=>'search'};
+get "/items/initial", {controller=>"Item", action=>'initial'};
 
 sub json_api {
     my $env = shift;

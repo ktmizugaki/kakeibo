@@ -1090,17 +1090,24 @@ function ByKamokuManager(tabbar, dialogManager, kamokuManager, date) {
       params.set("date_from", q.date_from);
       params.set("date_to", q.date_to);
     }
-    return Promise.all([Item.search(q)]).then(function(res){
+    var initial = Item.initial({kamoku_id: q.kamoku_id, date: q.date_from}).catch(function() { return Promise.resolve(null); });
+    return Promise.all([Item.search(q), initial]).then(function(res){
       var items = res[0]();
+      var initial = res[1];
       var sum = 0;
       items.sort(compareItemByDate);
+      if (initial) {
+        initial.id = "----";
+        initial.date = "----------";
+        initial.desc = "繰越";
+        items.unshift(initial);
+      }
       items.forEach(function(item) {
         sum += (item.dir()*item.amount()) || 0;
         item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
         item.sum = sum;
       });
       self.items(items);
-      page.setTitleInfo(self.kamoku()? self.kamoku().name(): "");
     });
   };
 }

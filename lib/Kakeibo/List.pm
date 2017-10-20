@@ -11,6 +11,7 @@ my $select_lists = prepare("select id,date,amount,is_initial from lists");
 my $select_lists_for_month = prepare("select id,date,amount,is_initial from lists where date like ?");
 my $select_lists_for_date = prepare("select id,date,amount,is_initial from lists where date like ?");
 my $select_list = prepare("select id,date,amount,is_initial from lists where id = ?");
+my $select_list_initial_for_date = prepare("select id,date,amount,is_initial from lists where is_initial != 0 and date <= ? order by date desc limit 1");
 my $insert_list = prepare("insert into lists(date,amount,is_initial) values (?, ?, ?)");
 my $update_list = prepare("update lists set date = ?, amount = ?, is_initial = ? where id = ?");
 my $delete_list = prepare("delete from lists where id = ?");
@@ -36,7 +37,16 @@ sub find {
     my $with_items = shift;
     my $list = one($select_list, $id);
     return undef unless $list;
-    $list->{items} = Kakeibo::Item::list($id);
+    $list->{items} = Kakeibo::Item::list($id) if $with_items;
+    return $list;
+}
+
+sub find_initial {
+    my $date = shift;
+    my $with_items = shift;
+    my $list = one($select_list_initial_for_date, $date);
+    return undef unless $list;
+    $list->{items} = Kakeibo::Item::list($list->{id}) if $with_items;
     return $list;
 }
 
@@ -147,6 +157,21 @@ sub show {
     $with_items = 1 unless defined $with_items;
     return undef unless defined $id;
     return find($id, $with_items);
+}
+
+sub initial {
+    my $req = shift;
+    my $date = $req->parameters->{date};
+    my $with_items = $req->parameters->{items};
+    $with_items = 1 unless defined $with_items;
+    return undef unless defined $date;
+    if ($date =~ /^[0-9]{4}-[0-9]{2}$/) {
+        $date .= "-00";
+    }
+    if ($date !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) {
+        return undef;
+    }
+    return find_initial($date, $with_items);
 }
 
 sub create {

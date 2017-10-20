@@ -12,6 +12,8 @@ my $update_item = prepare("update items set kamoku_id = ?, dir = ?, amount = ?, 
 my $delete_item = prepare("delete from items where list_id = ? and id = ?");
 my $has_list = prepare("select count(*) from lists where id = ?");
 my $has_kamoku = prepare("select count(*) from kamokus where id = ?");
+my $select_initial_amount = prepare("select sum(dir*amount) as amount from items where list_id = ? and kamoku_id = ?");
+my $calculate_initial_amount = prepare("select sum(items.dir*items.amount) as amount from items join lists on lists.id = items.list_id where date between ? and ? and kamoku_id = ?");
 
 my $select_items_by_kamoku = prepare("select items.id,lists.date,items.list_id,items.kamoku_id,items.dir,items.amount,items.desc from items join lists on lists.id = items.list_id where is_initial = 0 and date between ? and ? and kamoku_id = ?");
 
@@ -34,6 +36,23 @@ sub find {
     my $list_id = shift;
     my $id = shift;
     return one($select_item, $list_id, $id);
+}
+
+sub find_initial {
+    my $date = shift;
+    my $kamoku_id = shift;
+    my $list = Kakeibo::List::find_initial($date);
+    my $date_initial = $list ? $list->{date} : "0000-00-00";
+    my $kamoku = $list && $date_initial eq $date ?
+        one($select_initial_amount, $list->{id}, $kamoku_id):
+        one($calculate_initial_amount, $date_initial, $date, $kamoku_id);
+    my $amount = $kamoku ? $kamoku->{amount} : 0;
+    my $dir = 1;
+    if ($amount < 0) {
+        $amount = -$amount;
+        $dir = -1;
+    }
+    return {kamoku_id=>$kamoku_id, dir=>$dir, amount=>$amount, is_initial=>1};
 }
 
 sub is_valid {
@@ -80,6 +99,23 @@ sub search {
         return undef;
     }
     return all($select_items_by_kamoku, $date_from, $date_to, $kamoku_id);
+}
+
+sub initial {
+    my $req = shift;
+    my $date = $req->parameters->{date} || "0000-00-00";
+    my $kamoku_id = $req->parameters->{kamoku_id} || "";
+    my ($ret, $ret2);
+    if ($date =~ /^[0-9]{4}-[0-9]{2}$/) {
+        $date .= "-01";
+    }
+    if ($date !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) {
+        return undef;
+    }
+    if ($kamoku_id !~ /^[0-9]+$/) {
+        return undef;
+    }
+    return find_initial($date, $kamoku_id);
 }
 
 1;

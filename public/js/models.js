@@ -245,6 +245,12 @@ Item.inherits = Model.inherits;
 Item.inherits(Model);
 Item.all = function() { throw "Item.all is not supported"; };
 Item.get = function() { throw "Item.get is not supported"; };
+Item.initial = function(query) {
+  var ctor = this, path = this.path;
+  return json_api.get(path+"/initial", query).then(function(raw){
+    return new ctor(raw);
+  });
+};
 Item.prototype.save = function() { throw "Item#save is not supported"; };
 Item.prototype.kasiAmount = function() {
   return this.dir() == -1? this.amount(): 0;

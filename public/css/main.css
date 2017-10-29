@@ -248,3 +248,42 @@ body.open-dialog {
   position: absolute;
   background-color: #fff;
 }
+
+/* CalendarView */
+.calendar {
+  text-align: center;
+  width: 21em;
+  margin: 4px 0;
+}
+div.calendar > * {
+  width: 10%;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+}
+div.calendar > span.center {
+  text-align: center;
+  width: 48%;
+  font-size: 140%;
+}
+table.calendar > tbody > tr > td, table.calendar > tbody > tr > th {
+  text-align: center;
+  margin: 4px;
+  padding: 4px;
+}
+table.calendar > tbody > tr > td.selected {
+  background-color: #fc8;
+}
+table.calendar button {
+  display: block;
+  text-align: center;
+  background-color: transparent;
+  border: 0 none #000;
+  margin: 0 auto;
+  width: 95%;
+}
+table.calendar button > div {
+  display: inline-block;
+  margin: 0 auto;
+  text-align: right;
+}

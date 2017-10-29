@@ -38,8 +38,13 @@ function prev_month(str) {
   var stringfy = is_date_str(str)? date2str: is_month_str(str)? month2str: null;
   if (stringfy) {
     var date = new Date(str);
+    var month = date.getMonth();
     if (!isNaN(date.getTime())) {
       date.setMonth(date.getMonth()-1);
+      if (month == date.getMonth()) {
+        /* date exceeds number of days of previous month */
+        date.setDate(0);
+      }
       str = stringfy(date);
     }
   }

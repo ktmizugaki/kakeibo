@@ -1,0 +1,24 @@
+<div class="calendar">
+  <button class="normal left" data-bind="click: prev">≪</button>
+  <span class="left">&nbsp;</span>
+  <span class="center" data-bind="text: date"></span>
+  <button class="normal right" data-bind="click: now">今</button>
+  <button class="normal right" data-bind="click: next">≫</button>
+</div>
+<table class="calendar">
+  <theader data-bind="if: header">
+    <tr data-bind="foreach: header"><th data-bind="text: $data"></th></tr>
+  </theader>
+  <tbody data-bind="foreach: rows">
+    <tr data-bind="foreach: $data">
+      <td data-bind="css: {selected: value == $parents[1].date()}, click: $parents[1].selected">
+        <!-- ko if: value -->
+        <button><div data-bind="text: text"></div></button>
+        <!-- /ko -->
+        <!-- ko ifnot: value -->
+        &nbsp;
+        <!-- /ko -->
+      </td>
+    </tr>
+  </tbody>
+</table>

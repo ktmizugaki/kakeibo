@@ -158,7 +158,7 @@
     <form action="javascript:void(0)">
       <div class="form-group">
         <button class="normal" type="button" data-bind="click: prevDate">&lt;</button>
-        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date">
+        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date, calendarInput: {}">
         <button class="normal" type="button" data-bind="click: loadAll">○</button>
         <button class="normal" type="button" data-bind="click: nextDate">&gt;</button>
       </div>
@@ -201,7 +201,7 @@
       <div class="form-group">
         <label for="list-date" class="form-label">日付</label>
         <input id="list-date" type="text" class="date form-input"
-          data-bind="value: value().date, valueUpdate: 'blur', css:{error:value().error_for('date')}">
+          data-bind="value: value().date, calendarInput: {mode: 'date'}, valueUpdate: 'blur', css:{error:value().error_for('date')}">
         <div data-bind="foreach: value().error_for('date')"><span class="error" data-bind="text: $data"></span><br></div>
       </div>
       <table border="1" data-bind="event:{keypress:onKeyPress}">
@@ -275,7 +275,7 @@
     <form action="javascript:void(0)">
       <div class="form-group">
         <button class="normal" type="button" data-bind="click: prevDate">&lt;</button>
-        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date">
+        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date, calendarInput: {}">
         <button class="normal" type="button" data-bind="click: load">○</button>
         <button class="normal" type="button" data-bind="click: nextDate">&gt;</button>
         &nbsp;
@@ -367,7 +367,7 @@
       <div class="error" data-bind="visible: errors">入力内容に誤りがあります</div>
       <div class="form-group">
         <label for="date-from" class="form-label">期間</label>
-        <input id="date-from" type="text" class="date form-input" data-bind="textInput: date_from, css: {error: error_for('date_from')}"> ～ <input id="date-to" type="text" class="date form-input" data-bind="textInput: date_to, css: {error: error_for('date_to')}">
+        <input id="date-from" type="text" class="date form-input" data-bind="textInput: date_from, calendarInput: {title: '期間 開始'}, css: {error: error_for('date_from')}"> ～ <input id="date-to" type="text" class="date form-input" data-bind="textInput: date_to, calendarInput: {title: '期間 終了'}, css: {error: error_for('date_to')}">
         <div data-bind="foreach: error_for('date_from')"><span class="error" data-bind="text:$data"></span><br></div>
         <div data-bind="foreach: error_for('date_to')"><span class="error" data-bind="text:$data"></span><br></div>
       </div>
@@ -377,7 +377,7 @@
         <div data-bind="foreach: error_for('kamoku')"><span class="error" data-bind="text:$data"></span><br></div>
       </div>
       <span class="form-group form-submit">
-        <button type="submit">更新</button>
+        <button class="normal" type="submit">更新</button>
       </span>
     </form>
     <table border="1">
@@ -406,6 +406,15 @@
           <td class="cell-number" data-bind="text: sum"></td>
       </tr></tbody>
     </table>
+  </script>
+  <script type="text/html" id="template-datepick-dialog">
+    <div data-bind="component: {name: 'calendar', params: params}"></div>
+    <form>
+      <span class="form-group form-submit">
+        <button type="button" class="normal" data-bind="click: apply">決定</button>
+        <button type="button" class="normal" data-bind="click: cancel">取り消し</button>
+      </span>
+    </form>
   </script>
   <title>家計簿</title>
 </head>

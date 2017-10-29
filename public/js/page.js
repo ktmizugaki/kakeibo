@@ -15,6 +15,17 @@ var page = (function(_global) {
     dialogManager: dialogManager,
   };
   var initial = true;
+  ko.bindingHandlers.calendarInput = {
+    init: function(element, valueAccessor, allBindings) {
+      var date = allBindings.get('textInput') || allBindings.get('value');
+      element.addEventListener('focus', function() {
+        element.blur();
+        var value = ko.unwrap(valueAccessor());
+        value = ko.utils.extend(value, {date:date});
+        CalendarDialog(dialogManager, value);
+      });
+    }
+  };
 
   return {
     init: function page_init() {

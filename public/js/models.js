@@ -58,6 +58,7 @@ Model.get = function(id) {
     return new ctor(raw);
   });
 };
+Model.comparator = function(a, b) { return a == b? 0: a == null? -1: b == null? 1: a.compareTo(b); };
 Model.prototype.assign = function(raw) {
   var ctor = this.constructor, mapping = ctor.mapping;
   if (!mapping) throw (ctor.name||"Model")+".mapping is not set";
@@ -117,6 +118,7 @@ Model.prototype.toParams = function(options) {
   options = ko.utils.extend({ignore:["id", "errors"]}, options);
   return ko.mapping.toJS(this, options);
 };
+Model.prototype.compareTo = function(o) { return this.id() - o.id(); };
 
 function Category(raw) {
   Model.call(this, raw);
@@ -153,6 +155,13 @@ Kamoku.error_aliases = {
 };
 Kamoku.inherits = Model.inherits;
 Kamoku.inherits(Model);
+Kamoku.prototype.compareTo = function(o) {
+  var d = this.category().compareTo(o.category());
+  if (d != 0) return d;
+  if (this.code() < o.code()) return -1;
+  if (this.code() > o.code()) return 1;
+  return 0;
+}
 Kamoku.prototype.toString = function() {
   return "<勘定科目: "+this.code()+":"+this.name()+">";
 };
@@ -176,6 +185,11 @@ Template.inherits(Model);
 Template.prototype.json = {
   read: function() { try { return JSON.parse(this.text()); }catch(e){ return []; } },
   write: function(json) { return this.text(JSON.stringify(json)); }
+};
+Template.prototype.compareTo = function(o) {
+  if (this.name() < o.name()) return -1;
+  if (this.name() > o.name()) return 1;
+  return this.id() - o.id();
 };
 Template.prototype.toString = function() {
   return "<ひな型: "+this.name()+","+this.desc()+">";
@@ -305,3 +319,164 @@ function ByKamoku(raw) {
 }
 ByKamoku.inherits = Model.inherits;
 ByKamoku.inherits(Model);
+
+function DataStore() {
+  var self = this;
+
+  self.categoryMap = ko.observable(Object.create(null));
+  self.categories = ko.observableArray();
+
+  self.kamokuMap = ko.observable(Object.create(null));
+  self.kamokuCodeMap = ko.observable(Object.create(null));
+  self.kamokus = ko.observableArray();
+
+  self.tmpls = ko.observableArray();
+}
+/* Category */
+DataStore.prototype.pushCategory = function(cat, postponeSort) {
+  var id = cat.id.peek(), map, cats;
+  if (!id) return;
+  map = this.categoryMap.peek();
+  cats = this.categories;
+  if (map[id]) {
+    cats.remove(map[id]);
+  }
+  map[id] = cat;
+  cats.push(cat);
+  if (!cat.kamokus) {
+    cat.kamokus = this.computedKamokusByCategroy(id);
+  }
+  if (!postponeSort) {
+    cats.sort(Model.comparator);
+  }
+};
+DataStore.prototype.removeCategory = function(cat) {
+  var id = cat.id.peek(), map, cats;
+  if (!id) return;
+  map = this.categoryMap.peek();
+  cats = this.categories;
+  if (map[id] == cat) {
+    cats.remove(map[id]);
+    delete map[id];
+  }
+};
+DataStore.prototype.setCategories = function(cats) {
+  this.categoryMap(Object.create(null));
+  this.categories.removeAll();
+  cats.forEach(function(cat) { this.pushCategory(cat, true); }.bind(this));
+  this.categories.sort(Model.comparator);
+};
+DataStore.prototype.computedCategory = function(category_id) {
+  var cats = this.categories;
+  var map = this.categoryMap;
+  return ko.pureComputed({
+    read: function() {
+      var id = category_id();
+      cats(); /* to associate */
+      return id? map()[id]: null;
+    },
+    write: function(cat) {
+      category_id(cat?cat.id():null);
+    }
+  });
+};
+DataStore.prototype.computedKamokusByCategroy = function(category_id) {
+  return ko.computed(function() {
+    return this.kamokus().filter(function(kamoku) {
+      return kamoku.category_id() == category_id;
+    });
+  }.bind(this));
+};
+/* Kamoku */
+DataStore.prototype.pushKamoku = function(kamoku, postponeSort) {
+  var id = kamoku.id.peek(), code = kamoku.code.peek(), map, codeMap, kamokus;
+  if (!id) return;
+  map = this.kamokuMap.peek();
+  codeMap = this.kamokuCodeMap.peek();
+  kamokus = this.kamokus;
+  if (map[id]) {
+    kamokus.remove(map[id]);
+    delete codeMap[map[id].code.peek()];
+  }
+  map[id] = kamoku;
+  codeMap[code] = kamoku;
+  kamokus.push(kamoku);
+  if (!kamoku.category) {
+    kamoku.category = this.computedCategory(kamoku.category_id);
+  }
+  if (!postponeSort) {
+    kamokus.sort(Model.comparator);
+  }
+};
+DataStore.prototype.removeKamoku = function(kamoku) {
+  var id = kamoku.id.peek(), map, codeMap, kamokus;
+  if (!id) return;
+  map = this.kamokuMap.peek();
+  codeMap = this.kamokuCodeMap.peek();
+  kamokus = this.kamokus;
+  if (map[id] == kamoku) {
+    kamokus.remove(map[id]);
+    delete codeMap[map[id].code.peek()];
+    delete map[id];
+  }
+};
+DataStore.prototype.setKamokus = function(kamokus) {
+  this.kamokuMap(Object.create(null));
+  this.kamokuCodeMap(Object.create(null));
+  this.kamokus.removeAll();
+  kamokus.forEach(function(kamoku) { this.pushKamoku(kamoku, true); }.bind(this));
+  this.kamokus.sort(Model.comparator);
+};
+DataStore.prototype.computedKamoku = function(kamoku_id) {
+  var kamokus = this.kamokus;
+  var map = this.kamokuMap;
+  return ko.pureComputed({
+    read: function() {
+      var id = kamoku_id();
+      kamokus(); /* to associate */
+      return id? map()[id]: null;
+    },
+    write: function(kamoku) {
+      kamoku_id(kamoku?kamoku.id():null);
+    }
+  });
+};
+DataStore.prototype.computedKamokuCode = function(kamoku_id) {
+  var kamoku_code = null;
+  return ko.pureComputed({
+    read: function() {
+      var id = kamoku_id(),
+          cats = this.kamokus();
+      return id? kamokuMap[id].code(): kamoku_code;
+    },
+    write: function(code) {
+      var kamoku = code && kamokuCodeMap[code];
+      if (kamoku) {
+        kamoku_code = null;
+        kamoku_id(kamoku.id());
+      } else {
+        kamoku_code = code;
+        kamoku_id(null);
+      }
+    }
+  });
+};
+/* Template */
+DataStore.prototype.pushTmpl = function(tmpl, postponeSort) {
+  var id = tmpl.id.peek();
+  if (!id) return;
+  this.removeTmpl(tmpl);
+  this.tmpls.push(tmpl);
+  if (!postponeSort) {
+    this.tmpls.sort(Model.comparator);
+  }
+};
+DataStore.prototype.removeTmpl = function(tmpl) {
+  var id = tmpl.id.peek();
+  if (!id) return;
+  this.tmpls.remove(function(tmpl2) { return tmpl2.id() == id; });
+};
+DataStore.prototype.setTmpls = function(tmpls) {
+  this.tmpls(tmpls);
+  this.tmpls.sort(Model.comparator);
+};

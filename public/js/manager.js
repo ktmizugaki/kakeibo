@@ -1,11 +1,8 @@
-function KamokuManager(tabbar, dialogManager) {
+function KamokuManager(tabbar, dialogManager, dataStore) {
   var self = this;
-  var categoryMap = Object.create(null);
-  var kamokuMap = Object.create(null);
-  var kamokuCodeMap = Object.create(null);
   self.tabInfo = {label:"勘定科目",template:"template-kamokus",data:self};
-  self.categories = ko.observableArray();
-  self.kamokus = ko.observableArray();
+  self.categories = dataStore.categories;
+  self.kamokus = dataStore.kamokus;
   var dialog = self.dialog = {
     template:"template-kamoku-form",
     id: "kamoku-dialog",
@@ -31,121 +28,10 @@ function KamokuManager(tabbar, dialogManager) {
     dialog.edit = null;
     dialog.handle = null;
   };
-  self.computedCategory = function(category_id) {
-    return ko.pureComputed({
-      read: function() {
-        var id = category_id(),
-            cats = self.categories();
-        return id? categoryMap[id]: null;
-      },
-      write: function(cat) {
-        category_id(cat?cat.id():null);
-      }
-    });
-  };
-  self.computedKamokus = function(category_id) {
-    return ko.computed(function() {
-      return self.kamokus().filter(function(kamoku) {
-        return kamoku.category_id() == category_id;
-      });
-    });
-  };
-  self.computedKamoku = function(kamoku_id) {
-    return ko.pureComputed({
-      read: function() {
-        var id = kamoku_id(),
-            cats = self.kamokus();
-        return id? kamokuMap[id]: null;
-      },
-      write: function(kamoku) {
-        kamoku_id(kamoku?kamoku.id():null);
-      }
-    });
-  };
-  self.computedKamokuCode = function(kamoku_id) {
-    var kamoku_code = null;
-    return ko.pureComputed({
-      read: function() {
-        var id = kamoku_id(),
-            cats = self.kamokus();
-        return id? kamokuMap[id].code(): kamoku_code;
-      },
-      write: function(code) {
-        var kamoku = code && kamokuCodeMap[code];
-        if (kamoku) {
-          kamoku_code = null;
-          kamoku_id(kamoku.id());
-        } else {
-          kamoku_code = code;
-          kamoku_id(null);
-        }
-      }
-    });
-  };
-
-  function compareCategoryById(a,b) { return a.id() - b.id(); }
-  function compareKamokuByCode(a,b) {
-    if (a.code() < b.code()) return -1;
-    if (a.code() > b.code()) return 1;
-    return 0;
-  }
-  self.pushCategory = function(cat, postponeSort) {
-    var id = cat.id.peek();
-    if (!id) return;
-    if (categoryMap[id]) {
-      self.categories.remove(categoryMap[id]);
-    }
-    categoryMap[id] = cat;
-    self.categories.push(cat);
-    if (!cat.kamokus) {
-      cat.kamokus = self.computedKamokus(id);
-    }
-    if (!postponeSort) {
-      self.categories.sort(compareCategoryById);
-    }
-  };
-  self.removeCategory = function(cat) {
-    var id = cat.id.peek();
-    if (!id) return;
-    if (categoryMap[id] == cat) {
-      self.categories.remove(categoryMap[id]);
-      delete categoryMap[id];
-    }
-  };
-  self.pushKamoku = function(kamoku, postponeSort) {
-    var id = kamoku.id.peek();
-    if (!id) return;
-    if (kamokuMap[id]) {
-      self.kamokus.remove(kamokuMap[id]);
-      delete kamokuCodeMap[kamokuMap[id].code.peek()];
-    }
-    kamokuMap[id] = kamoku;
-    kamokuCodeMap[kamokuMap[id].code.peek()] = kamoku;
-    self.kamokus.push(kamoku);
-    if (!kamoku.category) {
-      kamoku.category = self.computedCategory(kamoku.category_id);
-    }
-    if (!postponeSort) {
-      self.kamokus.sort(compareKamokuByCode);
-    }
-  };
-  self.removeKamoku = function(kamoku) {
-    var id = kamoku.id.peek();
-    if (!id) return;
-    if (kamokuMap[id] == kamoku) {
-      self.kamoku.remove(kamokuMap[id]);
-      delete kamokuCodeMap[kamokuMap[id].code.peek()];
-      delete kamokuMap[id];
-    }
-  };
   self.loadAll = function() {
     return Promise.all([Category.all(), Kamoku.all()]).then(function(res){
-      self.categories.removeAll();
-      self.kamokus.removeAll();
-      res[0]().forEach(function(cat) { self.pushCategory(cat, true); });
-      res[1]().forEach(function(kamoku) { self.pushKamoku(kamoku, true); });
-      self.categories.sort(compareCategoryById);
-      self.kamokus.sort(compareKamokuByCode);
+      dataStore.setCategories(res[0]());
+      dataStore.setKamokus(res[1]());
     });
   };
 
@@ -157,7 +43,7 @@ function KamokuManager(tabbar, dialogManager) {
     dialog.handle = handle;
     var value = new Kamoku(kamoku&&kamoku.toObject());
     dialog.is_saving(false);
-    value.category = self.computedCategory(value.category_id);
+    value.category = dataStore.computedCategory(value.category_id);
     dialog.value(value);
     dialog.edit = kamoku;
     return true;
@@ -177,9 +63,9 @@ function KamokuManager(tabbar, dialogManager) {
     value.save().then(function(kamoku) {
       if (edit) {
         edit.assign(kamoku.toObject());
-        self.kamokus.sort(compareKamokuByCode);
+        dataStore.pushKamoku(edit);
       } else {
-        self.pushKamoku(kamoku);
+        dataStore.pushKamoku(kamoku);
       }
       if (value != dialog.value()) return;
       closeKamoku();
@@ -201,7 +87,7 @@ function KamokuManager(tabbar, dialogManager) {
     }
     dialog.is_saving(true);
     edit.destroy().then(function(kamoku) {
-      self.kamokus.remove(edit);
+      dataStore.removeKamoku(edit);
       if (value != dialog.value()) return;
       dialog.is_saving(false);
       closeKamoku();
@@ -209,7 +95,7 @@ function KamokuManager(tabbar, dialogManager) {
       if (value != dialog.value()) return;
       dialog.is_saving(false);
       if (err && err.status == 404) {
-        self.removeKamoku(edit);
+        dataStore.removeKamoku(edit);
         closeKamoku();
       } else {
         alert("エラーが発生しました");
@@ -218,19 +104,14 @@ function KamokuManager(tabbar, dialogManager) {
   };
 }
 
-function TmplManager(tabbar, dialogManager, kamokuManager) {
+function TmplManager(tabbar, dialogManager, dataStore) {
   var self = this;
   self.tabInfo = {label:"ひな型",template:"template-tmpls",data:self};
-  self.tmpls = ko.observableArray();
-  function compareTmplByName(a,b) {
-    if (a.name() < b.name()) return -1;
-    if (a.name() > b.name()) return 1;
-    return a.id() - b.id();
-  }
+  self.tmpls = dataStore.tmpls;
   var dialog = self.dialog = {
     template:"template-tmpl-form",
     id: "tmpl-dialog",
-    kamokus: kamokuManager.kamokus,
+    kamokus: dataStore.kamokus,
     is_saving: ko.observable(false),
     value: ko.observable(null),
     list: ko.observable(null),
@@ -259,10 +140,10 @@ function TmplManager(tabbar, dialogManager, kamokuManager) {
     if (!list) return [];
     return list.items().map(function(item) {
       if (!item.kamoku_code) {
-        item.kamoku_code = kamokuManager.computedKamokuCode(item.kamoku_id);
+        item.kamoku_code = dataStore.computedKamokuCode(item.kamoku_id);
       }
       if (!item.kamoku) {
-        item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+        item.kamoku = dataStore.computedKamoku(item.kamoku_id);
       }
       if (!item.kamoku_name) {
         item.kamoku_name = ko.computed(function() {
@@ -319,11 +200,8 @@ function TmplManager(tabbar, dialogManager, kamokuManager) {
   };
 
   self.loadAll = function() {
-    self.tmpls([]);
     return Promise.all([Template.all()]).then(function(res){
-      var tmpls = res[0]();
-      self.tmpls(tmpls);
-      self.tmpls.sort(compareTmplByName);
+      dataStore.setTmpls(res[0]());
     });
   };
 
@@ -404,10 +282,10 @@ function TmplManager(tabbar, dialogManager, kamokuManager) {
     value.save().then(function(tmpl) {
       if (edit) {
         edit.assign(tmpl.toObject());
+        dataStore.pushTmpl(edit);
       } else {
-        self.tmpls.push(tmpl);
+        dataStore.pushTmpl(tmpl);
       }
-      self.tmpls.sort(compareTmplByName);
       if (value == dialog.value()) {
         dialog.is_saving(false);
         closeTmpl();
@@ -430,7 +308,7 @@ function TmplManager(tabbar, dialogManager, kamokuManager) {
     }
     dialog.is_saving(true);
     edit.destroy().then(function(tmpl) {
-      self.tmpls.remove(edit);
+      dataStore.removeTmpl(edit);
       if (value != dialog.value()) return;
       dialog.is_saving(false);
       closeTmpl();
@@ -439,7 +317,7 @@ function TmplManager(tabbar, dialogManager, kamokuManager) {
       dialog.is_saving(false);
       if (err.errors) {
       } else if (err && err.status == 404) {
-        self.tmpls.remove(edit);
+        dataStore.removeTmpl(edit);
         closeTmpl();
       } else {
         alert("エラーが発生しました");
@@ -460,7 +338,7 @@ function TmplManager(tabbar, dialogManager, kamokuManager) {
   };
 }
 
-function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
+function ListManager(tabbar, dialogManager, dataStore, date) {
   var self = this;
   self.tabInfo = {label:"月仕訳一覧",template:"template-lists",data:self};
   self.tabInfo.onChange = function(tab, selected, name) {
@@ -479,12 +357,12 @@ function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
   var dialog = self.dialog = {
     template:"template-list-form",
     id: "list-dialog",
-    kamokus: kamokuManager.kamokus,
+    kamokus: dataStore.kamokus,
     is_saving: ko.observable(false),
     value: ko.observable(null),
     edit: null,
     tmpl: ko.observable(null),
-    tmpls: tmplManager.tmpls,
+    tmpls: dataStore.tmpls,
   };
   dialog.data = dialog;
   dialog.title = ko.pureComputed(function() {
@@ -515,10 +393,10 @@ function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
     }
     return list.items().map(function(item) {
       if (!item.kamoku_code) {
-        item.kamoku_code = kamokuManager.computedKamokuCode(item.kamoku_id);
+        item.kamoku_code = dataStore.computedKamokuCode(item.kamoku_id);
       }
       if (!item.kamoku) {
-        item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+        item.kamoku = dataStore.computedKamoku(item.kamoku_id);
       }
       if (!item.kamoku_name) {
         item.kamoku_name = ko.computed(function() {
@@ -618,7 +496,7 @@ function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
       var lists = res[0]();
       lists.forEach(function(list) {
         list.items().forEach(function(item) {
-          item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+          item.kamoku = dataStore.computedKamoku(item.kamoku_id);
         });
       });
       self.lists(lists);
@@ -707,11 +585,11 @@ function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
       if (edit) {
         edit.assign(list.toObject());
         edit.items().forEach(function(item) {
-          item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+          item.kamoku = dataStore.computedKamoku(item.kamoku_id);
         });
       } else {
         list.items().forEach(function(item) {
-          item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+          item.kamoku = dataStore.computedKamoku(item.kamoku_id);
         });
         self.lists.push(list);
       }
@@ -821,7 +699,7 @@ function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
       if (value == subdialog.value()) {
         subdialog.is_saving(false);
         closeToTmpl();
-        tmplManager.tmpls.push(tmpl);
+        dataStore.pushTmpl(tmpl);
       }
     }).catch(function(err) {
       if (value != subdialog.value()) return;
@@ -834,7 +712,7 @@ function ListManager(tabbar, dialogManager, kamokuManager, tmplManager, date) {
   };
 }
 
-function SummaryManager(tabbar, dialogManager, kamokuManager, date) {
+function SummaryManager(tabbar, dialogManager, dataStore, date) {
   var self = this;
   self.tabInfo = {label:"月集計",template:"template-summary",data:self};
   self.tabInfo.onChange = function(tab, selected, name) {
@@ -914,7 +792,7 @@ function SummaryManager(tabbar, dialogManager, kamokuManager, date) {
         } else {
           summary = map[kamoku_id] = new Summary();
           summary.kamoku_id(kamoku_id);
-          summary.kamoku = kamokuManager.computedKamoku(summary.kamoku_id);
+          summary.kamoku = dataStore.computedKamoku(summary.kamoku_id);
           array.push(summary);
         }
         if (item.is_initial == 1) {
@@ -940,20 +818,19 @@ function SummaryManager(tabbar, dialogManager, kamokuManager, date) {
       page.setTitleInfo(self.date());
     });
     if (!item.kamoku) {
-      item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+      item.kamoku = dataStore.computedKamoku(item.kamoku_id);
     }
   };
 
-  function compareCategoryById(a,b) { return a.id() - b.id(); }
   function compareKamokuByCode(a,b) {
-    var d = compareCategoryById(a.category(), b.category());
+    var d = a.category().compareTo(b.category());
     if (d) return d;
     if (a.code() < b.code()) return -1;
     if (a.code() > b.code()) return 1;
     return 0;
   }
   function compareSummaryItem(a,b) {
-    return compareKamokuByCode(a.kamoku(), b.kamoku());
+    return Model.comparator(a.kamoku(), b.kamoku());
   }
 
   self.makeCarryOver = function() {
@@ -967,10 +844,10 @@ function SummaryManager(tabbar, dialogManager, kamokuManager, date) {
     list.date(date2str(new Date(next_month(self.date()))));
     var carry = new Item();
     var carry_amount = 0;
-    kamokuManager.kamokus().forEach(function(kamoku) {
+    dataStore.kamokus().forEach(function(kamoku) {
       if (kamoku.category_id() == 4 && !carry.kamoku) {
         carry.kamoku_id(kamoku.id());
-        carry.kamoku = kamokuManager.computedKamoku(carry.kamoku_id);
+        carry.kamoku = dataStore.computedKamoku(carry.kamoku_id);
       }
     });
     list.items.push(carry);
@@ -1017,7 +894,7 @@ function SummaryManager(tabbar, dialogManager, kamokuManager, date) {
     dialog.is_saving(true);
     value.save().then(function(list) {
       list.items().forEach(function(item) {
-        item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+        item.kamoku = dataStore.computedKamoku(item.kamoku_id);
       });
       closeList();
     }).catch(function(err) {
@@ -1027,7 +904,7 @@ function SummaryManager(tabbar, dialogManager, kamokuManager, date) {
   };
 }
 
-function ByKamokuManager(tabbar, dialogManager, kamokuManager, date) {
+function ByKamokuManager(tabbar, dialogManager, dataStore, date) {
   var self = this;
   self.tabInfo = {label:"科目別",template:"template-bykamoku",data:self};
   self.search = new ByKamoku({
@@ -1035,8 +912,8 @@ function ByKamokuManager(tabbar, dialogManager, kamokuManager, date) {
     date_to: params.get("date_to") || date() || month2str(new Date()),
     kamoku_id: params.get("kamoku_id"),
   });
-  self.search.kamokus = kamokuManager.kamokus;
-  self.search.kamoku = kamokuManager.computedKamoku(self.search.kamoku_id);
+  self.search.kamokus = dataStore.kamokus;
+  self.search.kamoku = dataStore.computedKamoku(self.search.kamoku_id);
   params.query.subscribe(function() {
     var changed = false;
     var date_from = params.get("date_from");
@@ -1104,7 +981,7 @@ function ByKamokuManager(tabbar, dialogManager, kamokuManager, date) {
       }
       items.forEach(function(item) {
         sum += (item.dir()*item.amount()) || 0;
-        item.kamoku = kamokuManager.computedKamoku(item.kamoku_id);
+        item.kamoku = dataStore.computedKamoku(item.kamoku_id);
         item.sum = sum;
       });
       self.items(items);

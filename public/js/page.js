@@ -2,14 +2,15 @@ var page = (function(_global) {
   ko.options.deferUpdates = true;
   var tab = koTabbar({});
   var dialogManager = koDialogManager({});
+  var dataStore = new DataStore();
   var date = ko.observable(params.get("date") || month2str(new Date()));
   date.subscribe(function(date) { params.set("date", date); });
   params.query.extend({rateLimit:10}).subscribe(function() { var d = params.get("date"); if (d) date(d); });
-  var kamokus = new KamokuManager(tab, dialogManager);
-  var tmpls = new TmplManager(tab, dialogManager, kamokus);
-  var lists = new ListManager(tab, dialogManager, kamokus, tmpls, date);
-  var summary = new SummaryManager(tab, dialogManager, kamokus, date);
-  var bykamoku = new ByKamokuManager(tab, dialogManager, kamokus, date);
+  var kamokus = new KamokuManager(tab, dialogManager, dataStore);
+  var tmpls = new TmplManager(tab, dialogManager, dataStore);
+  var lists = new ListManager(tab, dialogManager, dataStore, date);
+  var summary = new SummaryManager(tab, dialogManager, dataStore, date);
+  var bykamoku = new ByKamokuManager(tab, dialogManager, dataStore, date);
   var data = {
     tab: tab,
     dialogManager: dialogManager,

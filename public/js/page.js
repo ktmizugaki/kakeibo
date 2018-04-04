@@ -1,4 +1,6 @@
 var page = (function(_global) {
+  /* preload template */
+  ko.components.get("calendar", function(res){});
   ko.options.deferUpdates = true;
   var tab = koTabbar({});
   var dialogManager = koDialogManager({});
@@ -16,13 +18,11 @@ var page = (function(_global) {
     dialogManager: dialogManager,
   };
   var initial = true;
-  ko.bindingHandlers.calendarInput = {
+  ko.bindingHandlers.calendarButton = {
     init: function(element, valueAccessor, allBindings) {
-      var date = allBindings.get('textInput') || allBindings.get('value');
-      element.addEventListener('focus', function() {
-        element.blur();
+      element.addEventListener('click', function() {
         var value = ko.unwrap(valueAccessor());
-        value = ko.utils.extend(value, {date:date});
+        value = ko.utils.extend(value);
         CalendarDialog(dialogManager, value);
       });
     }

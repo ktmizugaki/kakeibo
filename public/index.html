@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="icomoon/style.css">
   <link rel="stylesheet" href="css/bootstrap-reboot-4.0.0a6.min.css">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/partial.css">
@@ -158,8 +159,9 @@
     <form action="javascript:void(0)">
       <div class="form-group">
         <button class="normal" type="button" data-bind="click: prevDate">&lt;</button>
-        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date, calendarInput: {}">
-        <button class="normal" type="button" data-bind="click: loadAll">○</button>
+        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date">
+        <button class="normal" type="button" data-bind="calendarButton: {date: date}"><span class="icomoon icon-calendar"></button>
+        <button class="normal" type="button" data-bind="click: loadAll"><span class="icomoon icon-spinner11"></button>
         <button class="normal" type="button" data-bind="click: nextDate">&gt;</button>
       </div>
     </form>
@@ -201,7 +203,8 @@
       <div class="form-group">
         <label for="list-date" class="form-label">日付</label>
         <input id="list-date" type="text" class="date form-input"
-          data-bind="value: value().date, calendarInput: {mode: 'date'}, valueUpdate: 'blur', css:{error:value().error_for('date')}">
+          data-bind="value: value().date, valueUpdate: 'blur', css:{error:value().error_for('date')}">
+        <button class="normal" type="button" data-bind="calendarButton: {date: value().date, mode: 'date'}"><span class="icomoon icon-calendar"></button>
         <div data-bind="foreach: value().error_for('date')"><span class="error" data-bind="text: $data"></span><br></div>
       </div>
       <table border="1" data-bind="event:{keypress:onKeyPress}">
@@ -275,8 +278,9 @@
     <form action="javascript:void(0)">
       <div class="form-group">
         <button class="normal" type="button" data-bind="click: prevDate">&lt;</button>
-        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date, calendarInput: {}">
-        <button class="normal" type="button" data-bind="click: load">○</button>
+        <input id="lists-date" type="text" class="date form-input" data-bind="value: date">
+        <button class="normal" type="button" data-bind="calendarButton: {date: date}"><span class="icomoon icon-calendar"></button>
+        <button class="normal" type="button" data-bind="click: load"><span class="icomoon icon-spinner11"></button>
         <button class="normal" type="button" data-bind="click: nextDate">&gt;</button>
         &nbsp;
         <button class="normal" type="button" data-bind="visible: ko.pureComputed(function(){return is_month_str(date());}), click: makeCarryOver">繰越仕訳の作成</button>
@@ -367,7 +371,7 @@
       <div class="error" data-bind="visible: errors">入力内容に誤りがあります</div>
       <div class="form-group">
         <label for="date-from" class="form-label">期間</label>
-        <input id="date-from" type="text" class="date form-input" data-bind="textInput: date_from, calendarInput: {title: '期間 開始'}, css: {error: error_for('date_from')}"> ～ <input id="date-to" type="text" class="date form-input" data-bind="textInput: date_to, calendarInput: {title: '期間 終了'}, css: {error: error_for('date_to')}">
+        <input id="date-from" type="text" class="month form-input" data-bind="textInput: date_from, css: {error: error_for('date_from')}"><button class="normal" type="button" data-bind="calendarButton: {date: date_from, title: '期間 開始'}"><span class="icomoon icon-calendar"></button> ～ <input id="date-to" type="text" class="month form-input" data-bind="textInput: date_to, css: {error: error_for('date_to')}"><button class="normal" type="button" data-bind="calendarButton: {date: date_to, title: '期間 終了'}"><span class="icomoon icon-calendar"></button>
         <div data-bind="foreach: error_for('date_from')"><span class="error" data-bind="text:$data"></span><br></div>
         <div data-bind="foreach: error_for('date_to')"><span class="error" data-bind="text:$data"></span><br></div>
       </div>

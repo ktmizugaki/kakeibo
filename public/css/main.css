@@ -55,6 +55,7 @@ span.nobreak {
 .tab-bar input {
   position: absolute;
   opacity: 0;
+  pointer-events: none;
 }
 .tab-bar label {
   display: inline-block;
@@ -150,6 +151,9 @@ form .form-input {
   width: 10em;
   margin: 0 4px;
   padding: 4px 5px;
+}
+form .month.form-input {
+  width: 5.5em;
 }
 form .date.form-input {
   width: 7em;

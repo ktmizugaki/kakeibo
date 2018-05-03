@@ -110,7 +110,7 @@ var params = (function(_global) {
         if (p[0] == name) {
           if (initial) {
             initial = false;
-            notify = p[1] == value;
+            notify = p[1] != value;
             p[1] = value;
             return false;
           } else {

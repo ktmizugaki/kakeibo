@@ -22,11 +22,10 @@ cd `dirname $0` || die "can't cd to app dir"
 mkusrdir() {
     local dir=$1
     if [ -f $dir ]; then
-        echo "" >&2
-        exit 1
+        die "cannot create $dir"
     fi
     mkdir -p $dir || die "cannot create $dir"
-    chown $USER:$USER $dir || die "cannot change owner of $dir to $USER"
+    chown -R $USER:$USER $dir || die "cannot change owner of $dir to $USER"
 }
 
 status() {

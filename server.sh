@@ -77,7 +77,7 @@ case "$1" in
                 sleep 0.2
             done
         elif [ $rc == 1 ]; then
-            echo "Server is dead but pid exists"
+            echo "Server is dead"
             rm $PID
         else
             echo "Server is not running"
@@ -94,8 +94,7 @@ case "$1" in
         if [ $rc == 0 ]; then
             echo "Server is running"
         elif [ $rc == 1 ]; then
-            echo "Server is dead but pid exists"
-            rm $PID
+            echo "Server is dead but pid file exists"
         else
             echo "Server is not running"
         fi

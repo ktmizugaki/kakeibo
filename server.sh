@@ -70,6 +70,10 @@ case "$1" in
         if [ $rc == 0 ]; then
             echo "Stopping server"
             kill -TERM $(cat $PID)
+            for i in {1..10}; do
+                status || break
+                sleep 0.2
+            done
         elif [ $rc == 1 ]; then
             echo "Server is dead but pid exists"
             rm $PID

@@ -9,7 +9,7 @@ BEGIN {
 use Kakeibo;
 
 builder {
-    enable "Static", path => qr/^\/(?:img|css|js)/, root => "public";
+    enable "Static", path => qr/^\/(?:img|css|js|icomoon)/, root => "public";
     enable "Static", path => qr/\.html?$/, root => "public";
     \&Kakeibo::app;
 };

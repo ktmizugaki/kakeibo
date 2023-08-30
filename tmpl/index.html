@@ -101,6 +101,12 @@
           data-bind="value: desc, css:{error:error_for('desc')}">
         <div data-bind="foreach: error_for('desc')"><span class="error" data-bind="text: $data"></span><br></div>
       </div>
+      <div class="form-group">
+        <label for="tmpl-date" class="form-label">日</label>
+        <input id="tmpl-date" type="text" class="tmpl-date form-input"
+          data-bind="value: date, css:{error:error_for('date')}">
+        <div data-bind="foreach: error_for('date')"><span class="error" data-bind="text: $data"></span><br></div>
+      </div>
       <table border="1" data-bind="event:{keypress:$parent.onKeyPress}">
         <colgroup>
           <col class="col-kamoku-code">

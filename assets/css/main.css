@@ -164,6 +164,9 @@ form .desc.form-input {
 form .kamoku.form-input {
   width: 15em;
 }
+form .tmpl-date.form-input {
+  width: 2em;
+}
 form input.form-input, form select.form-input {
   border-top: 0px none #000;
   border-left: 0px none #000;

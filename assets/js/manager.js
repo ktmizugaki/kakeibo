@@ -258,9 +258,10 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     }
     dialog.handle = handle;
     var value = new Template(tmpl&&tmpl.toObject());
+    value.date = ko.observable(value.json().date);
     dialog.is_saving(false);
     dialog.value(value);
-    dialog.list(new List({items:value.json()}));
+    dialog.list(new List(value.json()));
     dialog.edit = tmpl;
     return true;
   }
@@ -277,8 +278,19 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     var list = dialog.list();
     var edit = dialog.edit;
     if (!value) return;
+    var date = value.date() || undefined;
+    if (date != undefined && date != '') {
+      var datenum = parseInt(date);
+      if (date != 'E' && (!date.match(/^[0-9]+$/) || datenum < 1 || datenum > 31)) {
+        console.error('invalid date for template', date);
+        value.errors({date: ['is not valid']});
+        dialog.is_saving(false);
+        return;
+      }
+    }
     dialog.is_saving(true);
-    value.json(list.toParams().items);
+    var items = list.toParams().items;
+    value.json({date:date,items:items});
     value.save().then(function(tmpl) {
       if (edit) {
         edit.assign(tmpl.toObject());
@@ -454,7 +466,16 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
   dialog.tmpl.subscribe(function(tmpl) {
     if (!tmpl) return;
     var list = dialog.value();
-    var items = tmpl.json();
+    var json = tmpl.json()
+    var date = json.date;
+    var items = json.items;
+    if (date) {
+      if (date.match(/^[0-9]+$/)) {
+        list.date(change_date(list.date(), parseInt(date)));
+      } else if (date === 'E') {
+        list.date(change_date(list.date(), date));
+      }
+    }
     if (items && items.length) {
       items.forEach(function(item, index) {
         if (list.items()[index]) {

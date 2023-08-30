@@ -11,6 +11,21 @@ function is_month_str(str) {
   return typeof str === "string" && str.match(/^[0-9]{4}-[0-9]{2}$/);
 }
 
+function change_date(str, dom) {
+  var date = new Date(str);
+  if (!isNaN(date.getTime())) {
+    if (typeof dom === "number" && dom >= 1 && dom <= 31) {
+      date.setDate(dom);
+    } else if (dom === 'E') {
+      date.setDate(1);
+      date.setMonth(date.getMonth()+1);
+      date.setDate(0);
+    }
+    str = date2str(date);
+  }
+  return str;
+}
+
 function prev_date(str) {
   var stringfy = is_date_str(str)? date2str: null;
   if (stringfy) {

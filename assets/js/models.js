@@ -168,7 +168,11 @@ Kamoku.prototype.toString = function() {
 
 function Template(raw) {
   Model.call(this, raw);
-  raw = ko.utils.extend({name:null, desc:null, text:"[]"}, raw);
+  if (raw && raw.text && raw.text.charAt(0) === '[') {
+    /* text is old format, convert to current format */
+    raw.text = '{"items":'+raw.text+'}';
+  }
+  raw = ko.utils.extend({name:null, desc:null, text:'{"items":[]}'}, raw);
   ko.mapping.fromJS(raw, Template.mapping, this);
   this.json = ko.pureComputed(this.json, this);
 }
@@ -183,7 +187,7 @@ Template.error_aliases = {
 Template.inherits = Model.inherits;
 Template.inherits(Model);
 Template.prototype.json = {
-  read: function() { try { return JSON.parse(this.text()); }catch(e){ return []; } },
+  read: function() { try { return JSON.parse(this.text()); }catch(e){ return {items:[]}; } },
   write: function(json) { return this.text(JSON.stringify(json)); }
 };
 Template.prototype.compareTo = function(o) {

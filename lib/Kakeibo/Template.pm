@@ -68,7 +68,7 @@ sub create {
     my $req = shift;
     my $json = eval { permit $req->parameters->{json}, $tmpl_params };
     die {status=>"400",error=>"Bad Request"} unless $json;
-    my $tmpl = {date=>undef,amount=>0,items=>[],%$json};
+    my $tmpl = {name=>'',desc=>'',text=>'[]',%$json};
     my $ret = trans {
         my $id = save($tmpl);
         if (!defined($id)) {

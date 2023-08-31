@@ -305,6 +305,10 @@ Summary.error_aliases = {
 };
 Summary.inherits = Model.inherits;
 Summary.inherits(Model);
+Summary.get = function(date) {
+  var ctor = this, path = this.path;
+  return json_api.get(path+"/"+date);
+};
 Summary.prototype.finalAmount = function() {
   return this.initialAmount()+this.kariAmount()-this.kasiAmount();
 };

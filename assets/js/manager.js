@@ -781,7 +781,7 @@ function SummaryManager(tabbar, dialogManager, dataStore, date) {
   };
   self.load = function() {
     self.summary([]);
-    return json_api.get("/summary/"+self.date()).then(function(results){
+    return Summary.get(self.date()).then(function(results){
       var map = {};
       var array = [];
       results.forEach(function(item) {

@@ -205,7 +205,7 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     });
   };
 
-  dialog.onKeyPress = function($data, event) {
+  dialog.onKeyDown = function($data, event) {
     var key = event.key || event.keyCode;
     var mod = (event.ctrlKey<<0)|(event.shiftKey<<1)|(event.altKey<<2);
     var items = dialog.list().items;
@@ -219,7 +219,27 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     if (event.isComposing === true || event.repeat === true) {
       return true;
     }
-    if (key == 'Enter' || key == 13) {
+    if (key === 'ArrowUp' || key === 38) {
+      if (mod == 1) {
+        if (id[1] > 0) {
+          let item = items.splice(id[1], 1)[0];
+          id[1]--;
+          items.splice(id[1], 0, item);
+        }
+      } else {
+        return true;
+      }
+    } else if (key === 'ArrowDown' || key === 40) {
+      if (mod == 1) {
+        if (id[1] < length-1) {
+          let item = items.splice(id[1], 1)[0];
+          id[1]++;
+          items.splice(id[1], 0, item);
+        }
+      } else {
+        return true;
+      }
+    } else if (key === 'Enter' || key === 13) {
       if (mod == 1) {
         id[1]++;
         id[2] = 0;
@@ -526,7 +546,7 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     });
   };
 
-  dialog.onKeyPress = function($data, event) {
+  dialog.onKeyDown = function($data, event) {
     var key = event.key || event.keyCode;
     var mod = (event.ctrlKey<<0)|(event.shiftKey<<1)|(event.altKey<<2);
     var items = dialog.value().items;
@@ -540,7 +560,27 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     if (event.isComposing === true || event.repeat === true) {
       return true;
     }
-    if (key == 'Enter' || key == 13) {
+    if (key === 'ArrowUp' || key === 38) {
+      if (mod == 1) {
+        if (id[1] > 0) {
+          var item = items.splice(id[1], 1)[0];
+          id[1]--;
+          items.splice(id[1], 0, item);
+        }
+      } else {
+        return true;
+      }
+    } else if (key === 'ArrowDown' || key === 40) {
+      if (mod == 1) {
+        if (id[1] < length-1) {
+          var item = items.splice(id[1], 1)[0];
+          id[1]++;
+          items.splice(id[1], 0, item);
+        }
+      } else {
+        return true;
+      }
+    } else if (key === 'Enter' || key === 13) {
       if (mod == 1) {
         id[1]++;
         id[2] = 0;

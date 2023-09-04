@@ -107,7 +107,7 @@
           data-bind="value: date, css:{error:error_for('date')}">
         <div data-bind="foreach: error_for('date')"><span class="error" data-bind="text: $data"></span><br></div>
       </div>
-      <table border="1" data-bind="event:{keypress:$parent.onKeyPress}">
+      <table border="1" data-bind="event:{keydown:$parent.onKeyDown}">
         <colgroup>
           <col class="col-kamoku-code">
           <col class="col-desc">
@@ -202,7 +202,7 @@
         <button class="normal" type="button" data-bind="calendarButton: {date: value().date, mode: 'date'}"><span class="icomoon icon-calendar"></button>
         <div data-bind="foreach: value().error_for('date')"><span class="error" data-bind="text: $data"></span><br></div>
       </div>
-      <table border="1" data-bind="event:{keypress:onKeyPress}">
+      <table border="1" data-bind="event:{keydown:$parent.onKeyDown}">
         <colgroup>
           <col class="col-kamoku-code">
           <col class="col-desc">

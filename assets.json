@@ -17,6 +17,7 @@
     "js/kakeibo.js": {
       "files": [
         "assets/js/util/date.js",
+        "assets/js/util/domutil.js",
         "assets/js/util/ko.extend.js",
         "assets/js/json_api.js",
         "assets/js/models.js",

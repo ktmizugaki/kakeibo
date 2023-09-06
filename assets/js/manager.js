@@ -205,6 +205,15 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     });
   };
 
+  dialog.onDrop = function($data, event) {
+    var items = dialog.list().items;
+    var fromRow = items.indexOf(event.detail.data);
+    var toRow = items.indexOf($data);
+    if (fromRow >= 0 && toRow >= 0) {
+      var item = items.splice(fromRow, 1)[0];
+      items.splice(toRow, 0, item);
+    }
+  };
   dialog.onKeyDown = function($data, event) {
     var key = event.key || event.keyCode;
     var mod = (event.ctrlKey<<0)|(event.shiftKey<<1)|(event.altKey<<2);
@@ -546,6 +555,15 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     });
   };
 
+  dialog.onDrop = function($data, event) {
+    var items = dialog.value().items;
+    var fromRow = items.indexOf(event.detail.data);
+    var toRow = items.indexOf($data);
+    if (fromRow >= 0 && toRow >= 0) {
+      var item = items.splice(fromRow, 1)[0];
+      items.splice(toRow, 0, item);
+    }
+  };
   dialog.onKeyDown = function($data, event) {
     var key = event.key || event.keyCode;
     var mod = (event.ctrlKey<<0)|(event.shiftKey<<1)|(event.altKey<<2);

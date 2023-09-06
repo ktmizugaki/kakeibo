@@ -5,3 +5,28 @@
 .initial_lists {
   background-color: #e4e4e4;
 }
+
+table.with-drag .col-kamoku-code {
+  width: 6.5em;
+}
+table.with-drag select.kamoku-code {
+  width: 4em;
+}
+table.with-drag tbody {
+  position: relative;
+}
+table.with-drag span.drag-handle {
+  display: inline-block;
+  margin-left: -4px;
+  width: 16px;
+  height: 26px;
+  vertical-align: middle;
+  cursor: move;
+}
+table.with-drag span.drag-handle img {
+  background-color: #dadada;
+  width: 100%;
+  height: 100%;
+  object-fit: none;
+  vertical-align: top;
+}

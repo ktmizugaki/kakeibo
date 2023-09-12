@@ -203,6 +203,7 @@ function List(raw) {
   Model.call(this, raw);
   raw = ko.utils.extend({date:raw?null:date2str(new Date()), amount:null, is_initial:false, items: []}, raw);
   ko.mapping.fromJS(raw, List.mapping, this);
+  this.repr = ko.pureComputed(this.repr, this);
   this.kasiItems = ko.pureComputed(this.kasiItems, this);
   this.kasiAmount = ko.pureComputed(this.kasiAmount, this);
   this.kariItems = ko.pureComputed(this.kariItems, this);
@@ -222,6 +223,9 @@ List.error_aliases = {
 };
 List.inherits = Model.inherits;
 List.inherits(Model);
+List.prototype.repr = function() {
+  return this.items().find(function(item, index) {return item.dir() == -1;});
+};
 List.prototype.kasiItems = function() {
   return this.items().filter(function(item, index) {return item.dir() == -1;});
 };

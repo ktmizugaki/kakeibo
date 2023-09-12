@@ -181,19 +181,16 @@
       </tr></thead>
       <tbody><!-- ko foreach: lists --><tr data-bind="css:{initial_lists: is_initial}">
           <td class="cell-number" data-bind="text: id"></td>
-          <td colspan="2"  data-bind="text: date"></td>
+          <td data-bind="text: date"></td>
+          <td>
+            <!-- ko if: repr() -->
+            <span class="nobreak" data-bind="text: repr().kamoku().name()"></span>
+            <span class="nobreak" data-bind="text: repr().desc"></span>
+            <!-- /ko -->
+          </td>
           <td class="cell-number" data-bind="text: amount"></td>
           <td><button class="normal" data-bind="click: $parent.dialog.editList">詳細</button></td>
-      </tr><!-- ko foreach: items --><tr data-bind="css:{initial_lists: $parent.is_initial}">
-          <td class="cell-number" data-bind="text: id"></td>
-          <td></td>
-          <td>
-            <span class="nobreak" data-bind="text: kamoku().name()"></span>
-            <span class="nobreak" data-bind="text: desc"></span>
-          </td>
-          <td class="cell-number" data-bind="text: dir()*amount()"></td>
-          <td></td>
-      </tr><!-- /ko --><!-- /ko --></tbody>
+      </tr><!-- /ko --></tbody>
     </table>
   </script>
   <script type="text/html" id="template-list-form">

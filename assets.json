@@ -1,0 +1,50 @@
+{
+  "static_root": "public",
+  "assets": {
+    "js/polyfill.js": {
+      "files": [
+        "public/js/json3-3.3.2.min.js",
+        "public/js/promise-7.0.4.min.js",
+        "public/js/fetch-2.0.2.min.js"
+      ]
+    },
+    "js/lib.js": {
+      "files": [
+        "public/js/knockout-3.4.1.min.js",
+        "public/js/knockout.mapping-2.4.1.min.js"
+      ]
+    },
+    "js/kakeibo.js": {
+      "files": [
+        "public/js/date.js",
+        "public/js/ko.extend.js",
+        "public/js/json_api.js",
+        "public/js/models.js",
+        "public/js/manager.js",
+        "public/js/strerr.jp.js",
+        "public/js/page.js"
+      ],
+      "type": "javascript",
+      "minify": true
+    },
+    "css/kakeibo.css": {
+      "files": [
+        "public/css/bootstrap-reboot-4.0.0a6.min.css",
+        "public/css/main.css",
+        "public/css/partial.css"
+      ],
+      "type": "css",
+      "minify": true
+    }
+  },
+  "tmpls": {
+    "index.html": {
+      "assets": [
+        "js/polyfill.js",
+        "js/lib.js",
+        "js/kakeibo.js",
+        "css/kakeibo.css"
+      ]
+    }
+  }
+}

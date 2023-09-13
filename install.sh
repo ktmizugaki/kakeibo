@@ -12,3 +12,6 @@ install FCGI
 install FCGI::ProcManager
 install DBI
 install DBD::SQLite
+install JavaScript::Minifier::XS
+install CSS::Minifier::XS
+install Log::Any

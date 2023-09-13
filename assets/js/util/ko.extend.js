@@ -439,10 +439,22 @@ function koDialogManager(options) {
 koDialogManager.tabId = 0;
 koDialogManager.methods = {
   onKeyDown: function(event) {
+    /* close dialog by escape key */
     var ds = this.dialogs();
-    /* to allow closing dropdown by escape key */
-    var is_select = event.target.tagName == "SELECT";
-    return !(ds.length && event.which == 27 && !is_select && this.close(ds[ds.length-1]));
+    if (ds.length && event.which == 27) {
+      /* to allow closing dropdown by escape key, pass through first escape key.
+       * but focus is removed from the dropdown, second escape key triggers
+       * dialog to be closed*/
+      if (event.target.tagName === "SELECT") {
+        event.target.blur();
+        return true;
+      }
+      if (this.close(ds[ds.length-1])) {
+        /* absorb escape key only if dialog was closed */
+        return false;
+      }
+    }
+    return true;
   },
   onClickOverlay: function(data, event) {
     var targetClass = " "+event.target.className+" ";

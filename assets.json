@@ -3,35 +3,35 @@
   "assets": {
     "js/polyfill.js": {
       "files": [
-        "public/js/json3-3.3.2.min.js",
-        "public/js/promise-7.0.4.min.js",
-        "public/js/fetch-2.0.2.min.js"
+        "assets/js/polyfill/json3-3.3.2.min.js",
+        "assets/js/polyfill/promise-7.0.4.min.js",
+        "assets/js/polyfill/fetch-2.0.2.min.js"
       ]
     },
     "js/lib.js": {
       "files": [
-        "public/js/knockout-3.4.1.min.js",
-        "public/js/knockout.mapping-2.4.1.min.js"
+        "assets/js/lib/knockout-3.4.1.min.js",
+        "assets/js/lib/knockout.mapping-2.4.1.min.js"
       ]
     },
     "js/kakeibo.js": {
       "files": [
-        "public/js/date.js",
-        "public/js/ko.extend.js",
-        "public/js/json_api.js",
-        "public/js/models.js",
-        "public/js/manager.js",
-        "public/js/strerr.jp.js",
-        "public/js/page.js"
+        "assets/js/util/date.js",
+        "assets/js/util/ko.extend.js",
+        "assets/js/json_api.js",
+        "assets/js/models.js",
+        "assets/js/manager.js",
+        "assets/js/strerr.jp.js",
+        "assets/js/page.js"
       ],
       "type": "javascript",
       "minify": true
     },
     "css/kakeibo.css": {
       "files": [
-        "public/css/bootstrap-reboot-4.0.0a6.min.css",
-        "public/css/main.css",
-        "public/css/partial.css"
+        "assets/css/bootstrap-reboot-4.0.0a6.min.css",
+        "assets/css/main.css",
+        "assets/css/partial.css"
       ],
       "type": "css",
       "minify": true
@@ -39,6 +39,7 @@
   },
   "tmpls": {
     "index.html": {
+      "tmpl": "tmpl/index.html",
       "assets": [
         "js/polyfill.js",
         "js/lib.js",

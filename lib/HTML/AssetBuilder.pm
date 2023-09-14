@@ -54,6 +54,18 @@ sub _read_file {
     return $file_content;
 }
 
+sub _write_file {
+    my ($filename, $content) = @_;
+    my $dir = $filename;
+    $dir =~ s#/[^/]*$##;
+    system('mkdir', '-p', $dir);
+    open(my $fh, ">", $filename) or return 0;
+    binmode $fh;
+    print $fh ($content);
+    close($fh);
+    return 1;
+}
+
 sub new {
     my ($class, $config) = @_;
     my $attrs = {caches=>{}, config=>undef};
@@ -217,6 +229,11 @@ sub tmpl_path {
     return $self->output_dir."/".$tmpl.".tmpl";
 }
 
+sub tmpl_output_path {
+    my ($self, $path) = @_;
+    return $self->output_dir."/".$path;
+}
+
 sub render_tmpl {
     my ($self, $tmpl) = @_;
     unless ($self->is_tmpl($tmpl)) {
@@ -259,6 +276,19 @@ sub render_tmpl {
     return $content;
 }
 
+sub render_tmpl_to_file {
+    my ($self, $tmpl) = @_;
+    my $path = $tmpl;
+    my ($content) = $self->render_tmpl($tmpl);
+    return unless defined($content);
+    my $dest = $self->tmpl_output_path($path);
+    $log->info("save tmpl $tmpl to $dest");
+    if (!_write_file($dest, $content)) {
+        die $log->fatal("failed to write tmpl $tmpl to $dest");
+    }
+    return ($dest, length($content));
+}
+
 sub assetlist {
     my ($self) = @_;
     return keys %{$self->{config}->{assets}};
@@ -280,6 +310,11 @@ sub unique_asset_path {
     my $fingerprint = substr(sha256_hex($content), 20);
     $path =~ s/\.[^.]+$|$/-$fingerprint$&/;
     return $path;
+}
+
+sub asset_output_path {
+    my ($self, $path) = @_;
+    return $self->output_dir."/".$path;
 }
 
 sub make_asset {
@@ -326,6 +361,18 @@ sub make_asset {
     $self->cache($asset, $cache);
     $self->cache($path, $cache);
     return $path, $content;
+}
+
+sub make_asset_to_file {
+    my ($self, $asset) = @_;
+    my ($path, $content) = $self->make_asset($asset);
+    return unless defined($content);
+    my $dest = $self->asset_output_path($path);
+    $log->info("save asset $asset to $dest");
+    if (!_write_file($dest, $content)) {
+        die $log->fatal("failed to write asset $asset to $dest");
+    }
+    return ($dest, length($content));
 }
 
 sub minify_js {

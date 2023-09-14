@@ -5,6 +5,12 @@ use parent qw( Plack::Middleware );
 use Plack::MIME;
 use HTML::AssetBuilder;
 
+sub prepare_app {
+    my($self) = @_;
+    # instanciate builder and check config
+    $self->builder;
+}
+
 sub call {
     my($self, $env) = @_;
 

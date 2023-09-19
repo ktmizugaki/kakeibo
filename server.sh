@@ -1,6 +1,14 @@
 #!/bin/bash
 
-[ $UID = 0 ] && USER=nginx && RUN_AS="su $USER -s"
+if [ $UID = 0 ]; then
+     XUSER=${XUSER:-www-data}
+     XGROUP=${XGROUP:-www-data}
+     RUN_AS="su $XUSER -s"
+else
+     XUSER=$USER
+     XGROUP=$USER
+fi
+
 PID=tmp/app.pid
 : ${PLAC_ENV:=development}
 
@@ -25,7 +33,7 @@ mkusrdir() {
         die "cannot create $dir"
     fi
     mkdir -p $dir || die "cannot create $dir"
-    chown -R $USER:$USER $dir || die "cannot change owner of $dir to $USER"
+    chown -R $XUSER:$XGROUP $dir || die "cannot change owner of $dir to $XUSER"
 }
 
 status() {
@@ -49,9 +57,9 @@ do_start() {
     if ! [ -f $DBFILE ]; then
         ./dbsetup.pl || die "failed to setup database"
     fi
-    chown $USER:$USER $DBFILE || die "cannot change owner of $dbfile to $USER"
+    chown $XUSER:$XGROUP $DBFILE || die "cannot change owner of $dbfile to $XUSER"
     touch $DBFILE-journal
-    chown $USER:$USER $DBFILE-journal || die "cannot change owner of $dbfile-jounral to $USER"
+    chown $XUSER:$XGROUP $DBFILE-journal || die "cannot change owner of $dbfile-jounral to $XUSER"
     echo "Starting server"
     exec $RUN_AS /bin/bash -c 'eval $(perl -Mlocal::lib=perl5);
 exec plackup '"$OPTIONS"' >>log/plackup.stdout.log 2>>log/plackup.stderr.log'

@@ -29,8 +29,10 @@ mkusrdir() {
 }
 
 status() {
-    if [ -r $PID ]; then
-        if kill -0 $(cat $PID); then
+    local pid
+    pid=$([ -r $PID ] && cat $PID 2>/dev/null)
+    if [ -n "$pid" ]; then
+        if kill -0 $pid; then
             return 0
         else
             return 1

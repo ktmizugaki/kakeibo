@@ -424,9 +424,12 @@ function koDialogManager(options) {
       '</div>'),
     foreach: manager.dialogs,
     afterAdd: function(element, index, data) {
-      if (typeof data.onDialogOpen == "function") {
-        data.onDialogOpen(data, element);
-      }
+      /* call callback after components are rendered */
+      setTimeout(function() {
+        if (typeof data.onDialogOpen == "function") {
+          data.onDialogOpen(data, element);
+        }
+      }, 100);
     },
   };
   document.addEventListener("keydown", m.onKeyDown.bind(manager), false);

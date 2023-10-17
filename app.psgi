@@ -7,6 +7,7 @@ BEGIN {
 }
 
 use Kakeibo;
+use File::LogFile;
 
 builder {
     # Detect daemon mode based on the server.sh which redirects stdout and
@@ -20,6 +21,10 @@ builder {
         enable "LogStdio",
             stdoutfile => "log/plackup.stdout.log",
             stderrfile => "log/plackup.stderr.log";
+
+        my $logfile = File::LogFile->new(filename=>"log/access.log");
+        enable "AccessLog", logger => sub { $logfile->print( @_ ) };
+
     }
     if (($ENV{PLACK_ENV} || 'development') eq 'development') {
         enable "Asset", config => "assets.json";

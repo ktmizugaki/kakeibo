@@ -14,7 +14,6 @@ PID=tmp/app.pid
 
 OPTIONS=
 OPTIONS="$OPTIONS -s FCGI -E ${PLAC_ENV}"
-OPTIONS="$OPTIONS --access-log log/access.log"
 OPTIONS="$OPTIONS -l tmp/app.socket"
 OPTIONS="$OPTIONS --pid $PID -D"
 

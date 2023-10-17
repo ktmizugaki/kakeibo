@@ -34,10 +34,10 @@ sub json_api {
     } elsif ($@) {
         warn $@;
         $status = "500";
-        $json = "{}";
+        $json = "{\"status\":500,\"error\":\"Internal Server Error\"}";
     } elsif (!defined($json)) {
         $status = "404";
-        $json = "{}";
+        $json = "{\"status\":404,\"error\":\"Not Found\"}";
     }
     return [$status, ["Content-Type" => "application/json"], [$json."\n"]];
 }

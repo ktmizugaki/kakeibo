@@ -9,6 +9,18 @@ BEGIN {
 use Kakeibo;
 
 builder {
+    # Detect daemon mode based on the server.sh which redirects stdout and
+    # stderr to file.
+    if (-f STDOUT || -f STDERR) {
+        # In the daemon mode, Plack::Handler::FCGI redirects stdio and stderr
+        # to /dev/null after daemonize and before accepting request.
+        # Since there is no hook between above points, let middleware app,
+        # LogStdio reopen stdout and stderr to files on each request.
+        # Bonus is this behaviour allows rotating log file.
+        enable "LogStdio",
+            stdoutfile => "log/plackup.stdout.log",
+            stderrfile => "log/plackup.stderr.log";
+    }
     if (($ENV{PLACK_ENV} || 'development') eq 'development') {
         enable "Asset", config => "assets.json";
         enable "Static", path => qr/^\/(?:img|css|js|icomoon)/, root => "public";

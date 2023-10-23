@@ -33,33 +33,7 @@
     </table>
   </script>
   <script type="text/html" id="template-kamoku-form">
-    <form data-bind="submit: $parent.saveKamoku, with: value()">
-      <div class="error" data-bind="visible: errors">入力内容に誤りがあります</div>
-      <div class="form-group">
-        <label for="kamoku_category" class="form-label">分類</label>
-        <!-- ko ifnot: id() -->
-        <select id="kamoku_category" type="text" class="form-input" data-bind="value: category, options: $parent.parent.categories, optionsText: 'name', optionsCaption: ' ', css: {error: error_for('category')}"></select>
-        <div data-bind="foreach: error_for('category')"><span class="error" data-bind="text:$data"></span><br></div>
-        <!-- /ko -->
-        <!-- ko if: id() -->
-        <span id="kamoku_category" class="form-input" data-bind="text: category().name"></span>
-        <!-- /ko -->
-      </div>
-      <div class="form-group">
-        <label for="kamoku_code" class="form-label">コード</label>
-        <input id="kamoku_code" type="text" class="form-input" data-bind="textInput: code, css: {error: error_for('code')}">
-        <div data-bind="foreach: error_for('code')"><span class="error" data-bind="text:$data"></span><br></div>
-      </div>
-      <div class="form-group">
-        <label for="kamoku_name" class="form-label">名称</label>
-        <input id="kamoku_name" type="text" class="form-input" data-bind="textInput: name, css: {error: error_for('name')}">
-        <div data-bind="foreach: error_for('name')"><span class="error" data-bind="text:$data"></span><br></div>
-      </div>
-      <span class="form-group form-submit">
-        <button type="submit" class="normal" data-bind="text: $parent.is_saving()? '保存中...': id()? '更新': '作成', disable: $parent.is_saving">&nbsp;</button>
-        <button type="button" class="normal" data-bind="visible: id, disable: $parent.is_saving, click: $parent.delKamoku">削除</button>
-      </span>
-    </form>
+  <!-- ko component: {name:'kamoku-form', params:$data} --><!-- /ko -->
   </script>
   <script type="text/html" id="template-tmpls">
     <h2>ひな形</h2>

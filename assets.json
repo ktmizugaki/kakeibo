@@ -23,6 +23,7 @@
         "assets/js/models.js",
         "assets/js/components.js",
         "assets/js/components/items-form.js",
+        "assets/js/components/kamoku-form.js",
         "assets/js/manager.js",
         "assets/js/strerr.jp.js",
         "assets/js/page.js"

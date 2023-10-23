@@ -7,9 +7,8 @@ function KamokuManager(tabbar, dialogManager, dataStore) {
     template:"template-kamoku-form",
     id: "kamoku-dialog",
     parent: self,
-    is_saving: ko.observable(false),
+    dataStore: dataStore,
     value: ko.observable(null),
-    edit: null,
   };
   dialog.data = dialog;
   dialog.title = ko.pureComputed(function() {
@@ -23,9 +22,7 @@ function KamokuManager(tabbar, dialogManager, dataStore) {
     if (dialog.handle != handle) {
       return;
     }
-    dialog.is_saving(false);
     dialog.value(null);
-    dialog.edit = null;
     dialog.handle = null;
   };
   self.loadAll = function() {
@@ -42,10 +39,8 @@ function KamokuManager(tabbar, dialogManager, dataStore) {
     }
     dialog.handle = handle;
     var value = new Kamoku(kamoku&&kamoku.toObject());
-    dialog.is_saving(false);
     value.category = dataStore.computedCategory(value.category_id);
     dialog.value(value);
-    dialog.edit = kamoku;
     return true;
   }
   function closeKamoku() {
@@ -55,53 +50,8 @@ function KamokuManager(tabbar, dialogManager, dataStore) {
   }
   dialog.addKamoku = function() { return openKamoku(); };
   dialog.editKamoku = function() { return openKamoku(this); };
-  dialog.saveKamoku = function() {
-    var value = dialog.value();
-    var edit = dialog.edit;
-    if (!value || dialog.is_saving()) return;
-    dialog.is_saving(true);
-    value.save().then(function(kamoku) {
-      if (edit) {
-        edit.assign(kamoku.toObject());
-        dataStore.pushKamoku(edit);
-      } else {
-        dataStore.pushKamoku(kamoku);
-      }
-      if (value != dialog.value()) return;
-      closeKamoku();
-    }).catch(function(err) {
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      if (err.errors) {
-      } else {
-        alert("エラーが発生しました");
-      }
-    });
-  };
-  dialog.delKamoku = function() {
-    var value = dialog.value();
-    var edit = dialog.edit;
-    if (!edit || !edit.id() || dialog.is_saving()) return;
-    if (!confirm("「"+edit.code()+" "+edit.name()+"」を削除しますか？")) {
-      return;
-    }
-    dialog.is_saving(true);
-    edit.destroy().then(function(kamoku) {
-      dataStore.removeKamoku(edit);
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      closeKamoku();
-    }).catch(function(err) {
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      if (err && err.status == 404) {
-        dataStore.removeKamoku(edit);
-        closeKamoku();
-      } else {
-        alert("エラーが発生しました");
-      }
-    });
-  };
+  dialog.onSave = closeKamoku;
+  dialog.onDel = closeKamoku;
 }
 
 function TmplManager(tabbar, dialogManager, dataStore) {

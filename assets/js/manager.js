@@ -173,6 +173,48 @@ ListDialog.prototype.onDialogClose = function(handle) {
   this.handle = null;
 };
 
+function ListToTmplDialog(dialogManager, dataStore) {
+  this.template = "template-list2tmpl-form";
+  this.id = "to-tmpl-dialog";
+  this.title = ko.observable("ひな型として保存");
+  this.data = {
+    dataStore: dataStore,
+    value: ko.observable(null),
+    list: null,
+    onSave: this.close.bind(this),
+  };
+  this.handle = null;
+  this.dialogManager = dialogManager;
+  this.onDialogOpen = this.onDialogOpen.bind(this);
+  this.onDialogClose = this.onDialogClose.bind(this);
+}
+ListToTmplDialog.prototype.open = function(list) {
+  var handle = this.dialogManager.open(this);
+  if (!handle) {
+    return false;
+  }
+  this.handle = handle;
+  this.data.value(new Template());
+  this.data.list = list.toParams();
+  return true;
+};
+ListToTmplDialog.prototype.close = function() {
+  if (this.handle) {
+    this.dialogManager.close(this.handle);
+  }
+};
+ListToTmplDialog.prototype.onDialogOpen = function(handle, element) {
+  element.querySelector("select, input").focus();
+};
+ListToTmplDialog.prototype.onDialogClose = function(handle) {
+  if (this.handle != handle) {
+    return;
+  }
+  this.data.value(null);
+  this.data.list = null;
+  this.handle = null;
+};
+
 function ListManager(tabbar, dialogManager, dataStore, date) {
   var self = this;
   self.tabInfo = {label:"月仕訳一覧",template:"template-lists",data:self};
@@ -191,13 +233,14 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
   });
 
   var dialog = new ListDialog(dialogManager, dataStore);
+  var toTmplDialog = new ListToTmplDialog(dialogManager, dataStore);
   var onDialogClose = dialog.onDialogClose;
   dialog.onDialogClose = function(handle) {
     if (dialog.handle != handle) {
       return;
     }
     onDialogClose(handle);
-    closeToTmpl();
+    toTmplDialog.close();
   };
   var onSave = dialog.data.onSave;
   dialog.data.onSave = function(list) {
@@ -266,40 +309,8 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     return true;
   };
   dialog.data.onToTmpl = function(list) {
-    var handle = dialogManager.open(subdialog);
-    if (!handle) {
-      return;
-    }
-    subdialog.handle = handle;
-    subdialog.value(new Template());
-    subdialog.list = list.toParams();
+    return toTmplDialog.open(list);
   };
-  function closeToTmpl() {
-    if (subdialog.handle) {
-      dialogManager.close(subdialog.handle);
-    }
-  }
-  var subdialog = dialog.data.subdialog = {
-    template:"template-list2tmpl-form",
-    id: "to-tmpl-dialog",
-    dataStore: dataStore,
-    value: ko.observable(null),
-    list: null
-  };
-  subdialog.data = subdialog;
-  subdialog.title = ko.observable("ひな型として保存");
-  subdialog.onDialogOpen = function(handle, element) {
-    element.querySelector("select, input").focus();
-  };
-  subdialog.onDialogClose = function(handle) {
-    if (dialog.handle != handle) {
-      return;
-    }
-    subdialog.value(null);
-    subdialog.list = null;
-    subdialog.handle = null;
-  };
-  subdialog.onSave = closeToTmpl;
 }
 
 function SummaryManager(tabbar, dialogManager, dataStore, date) {

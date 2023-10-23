@@ -1,0 +1,20 @@
+<select type="text" class="form-input" style="float:right" data-bind="value: tmpl, options: tmpls, optionsText: 'name', optionsCaption: 'ひな型'"></select>
+<form data-bind="submit: save">
+  <div class="error" data-bind="visible: value().errors">入力内容に誤りがあります</div>
+  <div class="form-group">
+    <label for="list-date" class="form-label">日付</label>
+    <input id="list-date" type="text" class="date form-input"
+      data-bind="value: value().date, valueUpdate: 'blur', css:{error:value().error_for('date')}">
+    <button class="normal" type="button" data-bind="calendarButton: {date: value().date, mode: 'date'}"><span class="icomoon icon-calendar"></button>
+    <div data-bind="foreach: value().error_for('date')"><span class="error" data-bind="text: $data"></span><br></div>
+  </div>
+  <div data-bind="component: {name:'items-form', params:$data}">
+  </div>
+
+  <div data-bind="foreach: value().error_for('amount')"><span class="error" data-bind="text:$data"></span><br></div>
+  <span class="form-group form-submit">
+    <button type="submit" class="normal" data-bind="text: is_saving()? '保存中...': value().id()? '更新': '作成', disable: is_saving">&nbsp;</button>
+    <button type="button" class="normal" data-bind="visible: value().id, disable: is_saving, click: del">削除</button>
+  </span>
+  <button type="button" class="normal" style="float:right" data-bind="disable: is_saving, click: toTmpl">ひな型にする</button>
+</form>

@@ -127,12 +127,8 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
   var dialog = self.dialog = {
     template:"template-list-form",
     id: "list-dialog",
-    kamokus: dataStore.kamokus,
-    is_saving: ko.observable(false),
+    dataStore: dataStore,
     value: ko.observable(null),
-    edit: null,
-    tmpl: ko.observable(null),
-    tmpls: dataStore.tmpls,
   };
   dialog.data = dialog;
   dialog.title = ko.pureComputed(function() {
@@ -146,51 +142,10 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     if (dialog.handle != handle) {
       return;
     }
-    dialog.is_saving(false);
     dialog.value(null);
-    dialog.edit = null;
     dialog.handle = null;
     closeToTmpl();
   };
-  dialog.list = ko.pureComputed(function() {
-    return dialog.value();
-  });
-  dialog.items = ko.computed(function() {
-    var list = dialog.value();
-    if (!list) return [];
-    if (!list.id()) {
-      while (list.items().length < 2) {
-        list.items.push(new Item());
-      }
-    }
-    return list.items().map(function(item) {
-      return new ItemInputProxy(item, dataStore);
-    });
-  });
-  dialog.tmpl.subscribe(function(tmpl) {
-    if (!tmpl) return;
-    var list = dialog.value();
-    var json = tmpl.json()
-    var date = json.date;
-    var items = json.items;
-    if (date) {
-      if (date.match(/^[0-9]+$/)) {
-        list.date(change_date(list.date(), parseInt(date)));
-      } else if (date === 'E') {
-        list.date(change_date(list.date(), date));
-      }
-    }
-    if (items && items.length) {
-      items.forEach(function(item, index) {
-        if (list.items()[index]) {
-          list.items()[index].assign(item);
-        } else {
-          list.items.push(new Item(item));
-        }
-      });
-    }
-    dialog.tmpl(null);
-  });
 
   function compareListByDate(a,b) {
     if (a.date() < b.date()) return -1;
@@ -242,7 +197,6 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
       dialog.handle = handle;
       dialog.value(list);
     });
-    dialog.edit = list;
     return true;
   }
   function closeList() {
@@ -253,75 +207,30 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
   dialog.closeList = closeList;
   dialog.addList = function() { return openList(); };
   dialog.editList = function() { return openList(this); };
-  dialog.saveList = function() {
-    var value = dialog.value();
-    var edit = dialog.edit;
-    if (!value) return;
-    dialog.is_saving(true);
-    // remove if completely unset
-    value.items.remove(function(item) { return item.isEmpty(); });
-    value.save().then(function(list) {
-      if (edit) {
-        edit.assign(list.toObject());
-        edit.items().forEach(function(item) {
-          item.kamoku = dataStore.computedKamoku(item.kamoku_id);
-        });
-      } else {
-        list.items().forEach(function(item) {
-          item.kamoku = dataStore.computedKamoku(item.kamoku_id);
-        });
-        self.lists.push(list);
-      }
-      self.lists.sort(compareListByDate);
-      if (value == dialog.value()) {
-        dialog.is_saving(false);
-        closeList();
-      }
-    }).catch(function(err) {
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      if (err.errors) {
-      } else {
-        alert("エラーが発生しました");
-      }
-    });
-  };
-  dialog.delList = function() {
-    var value = dialog.value();
-    var edit = dialog.edit;
-    if (!edit || !edit.id()) return;
-    if (!confirm(value.date()+"の仕訳を削除しますか？")) {
-      return;
+  dialog.onSave = function(list) {
+    var prev = Model.arrayFind(self.lists(), list);
+    if (prev) {
+      self.lists.remove(prev);
     }
-    dialog.is_saving(true);
-    edit.destroy().then(function(list) {
-      self.lists.remove(edit);
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      closeList();
-    }).catch(function(err) {
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      if (err.errors) {
-      } else if (err && err.status == 404) {
-        self.lists.remove(edit);
-        closeList();
-      } else {
-        alert("エラーが発生しました");
-      }
-    });
+    self.lists.push(list);
+    self.lists.sort(compareListByDate);
+    closeList();
   };
-  dialog.openToTmpl = function() {
-    if (!dialog.value()) {
-      return;
+  dialog.onDel = function(list) {
+    var prev = Model.arrayFind(self.lists(), list);
+    if (prev) {
+      self.lists.remove(prev);
     }
+    closeList();
+  };
+  dialog.onToTmpl = function(list) {
     var handle = dialogManager.open(subdialog);
     if (!handle) {
       return;
     }
     subdialog.handle = handle;
     subdialog.value(new Template());
-    subdialog.list = dialog.value().toParams();
+    subdialog.list = list.toParams();
   };
   function closeToTmpl() {
     if (subdialog.handle) {

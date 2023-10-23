@@ -59,6 +59,15 @@ Model.get = function(id) {
   });
 };
 Model.comparator = function(a, b) { return a == b? 0: a == null? -1: b == null? 1: a.compareTo(b); };
+Model.arrayFind = function(arr, model) {
+  var id = ko.utils.unwrapObservable(model.id);
+  for (var i = 0, j = arr.length; i < j; i++) {
+    if (ko.utils.unwrapObservable(arr[i].id) == id) {
+      return arr[i];
+    }
+  }
+  return null;
+};
 Model.prototype.assign = function(raw) {
   var ctor = this.constructor, mapping = ctor.mapping;
   if (!mapping) throw (ctor.name||"Model")+".mapping is not set";

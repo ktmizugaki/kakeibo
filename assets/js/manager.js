@@ -240,7 +240,7 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
   var subdialog = {
     template:"template-list2tmpl-form",
     id: "to-tmpl-dialog",
-    is_saving: ko.observable(false),
+    dataStore: dataStore,
     value: ko.observable(null),
     list: null
   };
@@ -253,39 +253,11 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     if (dialog.handle != handle) {
       return;
     }
-    subdialog.is_saving(false);
     subdialog.value(null);
     subdialog.list = null;
     subdialog.handle = null;
   };
-  subdialog.saveAsTmpl = function() {
-    var value = subdialog.value();
-    var list = subdialog.list;
-    if (!value) return;
-    subdialog.is_saving(true);
-    if (list.items) {
-      list.items.forEach(function(item) {
-        delete item.list_id;
-        delete item.dir;
-        delete item.amount;
-      });
-      value.json({items:list.items});
-    }
-    value.save().then(function(tmpl) {
-      if (value == subdialog.value()) {
-        subdialog.is_saving(false);
-        closeToTmpl();
-        dataStore.pushTmpl(tmpl);
-      }
-    }).catch(function(err) {
-      if (value != subdialog.value()) return;
-      subdialog.is_saving(false);
-      if (err.errors) {
-      } else {
-        alert("エラーが発生しました");
-      }
-    });
-  };
+  subdialog.onSave = closeToTmpl;
 }
 
 function SummaryManager(tabbar, dialogManager, dataStore, date) {

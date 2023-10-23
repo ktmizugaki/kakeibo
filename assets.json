@@ -26,6 +26,7 @@
         "assets/js/components/kamoku-form.js",
         "assets/js/components/tmpl-form.js",
         "assets/js/components/list-form.js",
+        "assets/js/components/list2tmpl-form.js",
         "assets/js/manager.js",
         "assets/js/strerr.jp.js",
         "assets/js/page.js"

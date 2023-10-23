@@ -97,25 +97,7 @@
   <!-- ko component: {name:'list-form', params:$data} --><!-- /ko -->
   </script>
   <script type="text/html" id="template-list2tmpl-form">
-    <form data-bind="submit: saveAsTmpl, with: value()">
-      <div class="error" data-bind="visible: errors">入力内容に誤りがあります</div>
-      <div class="form-group">
-        <label for="tmpl-name" class="form-label">名前</label>
-        <input id="tmpl-name" type="text" class="form-input"
-          data-bind="value: name, css:{error:error_for('name')}">
-        <div data-bind="foreach: error_for('name')"><span class="error" data-bind="text: $data"></span><br></div>
-      </div>
-      <div class="form-group">
-        <label for="tmpl-desc" class="form-label">説明</label>
-        <input id="tmpl-desc" type="text" class="form-input"
-          data-bind="value: desc, css:{error:error_for('desc')}">
-        <div data-bind="foreach: error_for('desc')"><span class="error" data-bind="text: $data"></span><br></div>
-      </div>
-
-      <span class="form-group form-submit">
-        <button type="submit" class="normal" data-bind="text: $parent.is_saving()? '保存中...': '作成', disable: $parent.is_saving">&nbsp;</button>
-      </span>
-    </form>
+  <!-- ko component: {name:'list2tmpl-form', params:$data} --><!-- /ko -->
   </script>
   <script type="text/html" id="template-summary">
     <h2>月集計</h2>

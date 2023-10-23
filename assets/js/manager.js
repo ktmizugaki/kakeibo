@@ -65,58 +65,68 @@ function KamokuManager(tabbar, dialogManager, dataStore) {
   };
 }
 
-function TmplManager(tabbar, dialogManager, dataStore) {
-  var self = this;
-  self.tabInfo = {label:"ひな型",template:"template-tmpls",data:self};
-  self.tmpls = dataStore.tmpls;
-  var dialog = self.dialog = {
-    template:"template-tmpl-form",
-    id: "tmpl-dialog",
+function TmplDialog(dialogManager, dataStore) {
+  this.template = "template-tmpl-form";
+  this.id = "tmpl-dialog";
+  this.title = ko.pureComputed(this.title.bind(this));
+  this.data = {
     dataStore: dataStore,
     value: ko.observable(null),
+    onSave: this.close.bind(this),
+    onDel: this.close.bind(this),
   };
-  dialog.data = dialog;
-  dialog.title = ko.pureComputed(function() {
-    var value = dialog.value();
-    return value? value.id()? "ひな型の更新": "ひな型の追加": null;
-  });
-  dialog.onDialogOpen = function(handle, element) {
-    element.querySelector("select, input").focus();
-  };
-  dialog.onDialogClose = function(handle) {
-    if (dialog.handle != handle) {
-      return;
-    }
-    dialog.value(null);
-    dialog.handle = null;
-  };
+  this.handle = null;
+  this.dialogManager = dialogManager;
+  this.onDialogOpen = this.onDialogOpen.bind(this);
+  this.onDialogClose = this.onDialogClose.bind(this);
+}
+TmplDialog.prototype.title = function() {
+  var value = this.data.value();
+  return value? value.id()? "ひな型の更新": "ひな型の追加": null;
+};
+TmplDialog.prototype.open = function(tmpl) {
+  var handle = this.dialogManager.open(this);
+  if (!handle) {
+    return false;
+  }
+  this.handle = handle;
+  var value = new Template(tmpl&&tmpl.toObject());
+  value.date = ko.observable(value.json().date);
+  this.data.value(value);
+  return true;
+};
+TmplDialog.prototype.close = function() {
+  if (this.handle) {
+    this.dialogManager.close(this.handle);
+  }
+};
+TmplDialog.prototype.onDialogOpen = function(handle, element) {
+  element.querySelector("select, input").focus();
+};
+TmplDialog.prototype.onDialogClose = function(handle) {
+  if (this.handle != handle) {
+    return;
+  }
+  this.data.value(null);
+  this.handle = null;
+};
 
-  self.loadAll = function() {
+function TmplManager(tabbar, dialogManager, dataStore) {
+  this.tabInfo = {label:"ひな型",template:"template-tmpls",data:this};
+  this.tmpls = dataStore.tmpls;
+  this.loadAll = function() {
     return Promise.all([Template.all()]).then(function(res){
       dataStore.setTmpls(res[0]());
     });
   };
 
-  function openTmpl(tmpl) {
-    var handle = dialogManager.open(dialog);
-    if (!handle) {
-      return false;
-    }
-    dialog.handle = handle;
-    var value = new Template(tmpl&&tmpl.toObject());
-    value.date = ko.observable(value.json().date);
-    dialog.value(value);
-    return true;
-  }
-  function closeTmpl() {
-    if (dialog.handle) {
-      dialogManager.close(dialog.handle);
-    }
-  }
-  dialog.addTmpl = function() { return openTmpl(); };
-  dialog.editTmpl = function() { return openTmpl(this); };
-  dialog.onSave = closeTmpl;
-  dialog.onDel = closeTmpl;
+  var dialog = new TmplDialog(dialogManager, dataStore);
+  this.addTmpl = function() {
+    return dialog.open();
+  };
+  this.editTmpl = function() {
+    return dialog.open(this);
+  };
 }
 
 function ListManager(tabbar, dialogManager, dataStore, date) {

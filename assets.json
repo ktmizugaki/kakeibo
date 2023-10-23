@@ -21,6 +21,8 @@
         "assets/js/util/ko.extend.js",
         "assets/js/json_api.js",
         "assets/js/models.js",
+        "assets/js/components.js",
+        "assets/js/components/items-form.js",
         "assets/js/manager.js",
         "assets/js/strerr.jp.js",
         "assets/js/page.js"

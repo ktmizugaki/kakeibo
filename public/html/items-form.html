@@ -1,0 +1,43 @@
+<table border="1" class="with-drag">
+  <colgroup>
+    <col class="col-kamoku-code">
+    <col class="col-desc">
+    <col class="col-amount">
+    <col class="col-amount">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>科目</th>
+      <th>摘要</th>
+      <th>借方</th>
+      <th>貸方</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody class="dragroot" data-bind="foreach: items">
+    <tr data-bind="attr: {'data-row': $index()}, draggable: {direction: 'vertical'}, event:{kodrop:$parent.onDrop,keydown:$parent.onKeyDown}">
+      <td style="white-space: nowrap">
+        <span class="drag-handle"><img src="img/drag-handle.png"></span>
+        <select class="kamoku-code form-input" data-bind="value: kamoku, options: $parent.kamokus, optionsText: function(item){return item.code()+' '+item.name();}, optionsCaption: ' ', css: {error: error_for('kamoku')}, attr: {id:'item-'+$index()+'-0'}"></select>
+      </td>
+      <td><input type="text" class="form-input" data-bind="textInput: desc, css:{error:error_for('desc')}, attr:{placeholder: kamoku_name, id:'item-'+$index()+'-1'}"></td>
+      <td><input type="number" class="form-number form-input" data-bind="value: kasiInput, css:{error:error_for('amount')}, attr:{id:'item-'+$index()+'-2'}"></td>
+      <td><input type="number" class="form-number form-input" data-bind="value: kariInput, css:{error:error_for('amount')}, attr:{id:'item-'+$index()+'-3'}"></td>
+      <td><button class="icon" type="button" data-bind="click: $parent.removeItem">－</button></td>
+    </tr><tr data-bind="if: errors">
+      <td colspan="5">
+        <div data-bind="foreach: error_for('kamoku')"><span class="error" data-bind="text:$data"></span><br></div>
+        <div data-bind="foreach: error_for('desc')"><span class="error" data-bind="text:$data"></span><br></div>
+        <div data-bind="foreach: error_for('amount')"><span class="error" data-bind="text:$data"></span><br></div>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td class="cell-number" colspan="2">計</td>
+      <td class="cell-number" data-bind="text: list().kasiAmount, css:{error:list().error_for('amount')}"></td>
+      <td class="cell-number" data-bind="text: list().kariAmount, css:{error:list().error_for('amount')}"></td>
+      <td><button class="icon" type="button" data-bind="click: addItem">＋</button></td>
+    </tr>
+  </tfoot>
+</table>

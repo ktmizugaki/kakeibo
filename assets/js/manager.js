@@ -139,65 +139,9 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     var list = dialog.list();
     if (!list) return [];
     return list.items().map(function(item) {
-      if (!item.kamoku_code) {
-        item.kamoku_code = dataStore.computedKamokuCode(item.kamoku_id);
-      }
-      if (!item.kamoku) {
-        item.kamoku = dataStore.computedKamoku(item.kamoku_id);
-      }
-      if (!item.kamoku_name) {
-        item.kamoku_name = ko.computed(function() {
-          return this.kamoku() && this.kamoku().name();
-        }, item);
-      }
-      if (!item.kasiInput) {
-        item.kasiInput = self.computedAmountInput(item, -1);
-      }
-      if (!item.kariInput) {
-        item.kariInput = self.computedAmountInput(item, 1);
-      }
-      return item;
+      return new ItemInputProxy(item, dataStore);
     });
   });
-  self.computedAmountInput = function(item, dir) {
-    return ko.pureComputed({
-      read: function() {
-        var amount = item.amount();
-        return item.dir() == dir? amount: null;
-      },
-      write: function(amount) {
-        if (amount == "") {
-          if (item.dir() == dir) {
-            item.dir(null);
-            item.amount(null);
-          }
-          return;
-        }
-        var lastDir = item.dir.peek();
-        var lastAmount = item.amount.peek() || 0;
-        amount = parseInt(amount) || 0;
-        if (lastDir == null) {
-          item.dir(dir);
-          item.amount(amount);
-        } else if (lastDir == dir) {
-          if (amount != lastAmount) {
-            item.amount(amount);
-          }
-        } else {
-          if (lastAmount > amount) {
-            item.amount(lastAmount - amount);
-          } else if (lastAmount == amount) {
-            item.dir(null);
-            item.amount(null);
-          } else {
-            item.dir(dir);
-            item.amount(amount - lastAmount);
-          }
-        }
-      },
-      owner: item
-    }).extend({notify:'always'});
-  };
 
   self.loadAll = function() {
     return Promise.all([Template.all()]).then(function(res){
@@ -205,81 +149,6 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     });
   };
 
-  dialog.onDrop = function($data, event) {
-    var items = dialog.list().items;
-    var fromRow = items.indexOf(event.detail.data);
-    var toRow = items.indexOf($data);
-    if (fromRow >= 0 && toRow >= 0) {
-      var item = items.splice(fromRow, 1)[0];
-      items.splice(toRow, 0, item);
-    }
-  };
-  dialog.onKeyDown = function($data, event) {
-    var key = event.key || event.keyCode;
-    var mod = (event.ctrlKey<<0)|(event.shiftKey<<1)|(event.altKey<<2);
-    var items = dialog.list().items;
-    var elem = event.target;
-    if ((""+elem.id).indexOf("item-") != 0) return true;
-    var $context = ko.contextFor(elem);
-    var index = $context.$index(), length = items().length;
-    var id = (""+elem.id).split(/-/);
-    id[1] = +id[1];
-    id[2] = +id[2];
-    if (event.isComposing === true || event.repeat === true) {
-      return true;
-    }
-    if (key === 'ArrowUp' || key === 38) {
-      if (mod == 1) {
-        if (id[1] > 0) {
-          let item = items.splice(id[1], 1)[0];
-          id[1]--;
-          items.splice(id[1], 0, item);
-        }
-      } else {
-        return true;
-      }
-    } else if (key === 'ArrowDown' || key === 40) {
-      if (mod == 1) {
-        if (id[1] < length-1) {
-          let item = items.splice(id[1], 1)[0];
-          id[1]++;
-          items.splice(id[1], 0, item);
-        }
-      } else {
-        return true;
-      }
-    } else if (key === 'Enter' || key === 13) {
-      if (mod == 1) {
-        id[1]++;
-        id[2] = 0;
-        if (id[1] == length) {
-          items.push(new Item());
-        }
-        ko.tasks.runEarly();
-      } else if (mod == 2) {
-        if (id[1] == 0) return false;
-        id[1]--;
-      } else if (mod == 0) {
-        if (id[1] == length-1) return false;
-        id[1]++;
-      } else {
-        return true;
-      }
-    } else {
-      return true;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    elem.blur();
-    elem.focus();
-    setTimeout(function() {
-      elem = document.getElementById(id.join("-"));
-      if (elem) {
-        elem.focus();
-      }
-    }, 0);
-    return false;
-  };
   function openTmpl(tmpl) {
     var handle = dialogManager.open(dialog);
     if (!handle) {
@@ -365,18 +234,6 @@ function TmplManager(tabbar, dialogManager, dataStore) {
       }
     });
   };
-  dialog.addItem = function() {
-    var list = dialog.list();
-    if (list) {
-      list.items.push(new Item());
-    }
-  };
-  dialog.removeItem = function($data) {
-    var list = dialog.list();
-    if (list) {
-      list.items.remove($data);
-    }
-  };
 }
 
 function ListManager(tabbar, dialogManager, dataStore, date) {
@@ -423,75 +280,21 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     dialog.handle = null;
     closeToTmpl();
   };
+  dialog.list = ko.pureComputed(function() {
+    return dialog.value();
+  });
   dialog.items = ko.computed(function() {
     var list = dialog.value();
     if (!list) return [];
-    if (!list.id() && list.items().length < 2) {
+    if (!list.id()) {
       while (list.items().length < 2) {
         list.items.push(new Item());
       }
-      return [];
     }
     return list.items().map(function(item) {
-      if (!item.kamoku_code) {
-        item.kamoku_code = dataStore.computedKamokuCode(item.kamoku_id);
-      }
-      if (!item.kamoku) {
-        item.kamoku = dataStore.computedKamoku(item.kamoku_id);
-      }
-      if (!item.kamoku_name) {
-        item.kamoku_name = ko.computed(function() {
-          return this.kamoku() && this.kamoku().name();
-        }, item);
-      }
-      if (!item.kasiInput) {
-        item.kasiInput = self.computedAmountInput(item, -1);
-      }
-      if (!item.kariInput) {
-        item.kariInput = self.computedAmountInput(item, 1);
-      }
-      return item;
+      return new ItemInputProxy(item, dataStore);
     });
   });
-  self.computedAmountInput = function(item, dir) {
-    return ko.pureComputed({
-      read: function() {
-        var amount = item.amount();
-        return item.dir() == dir? amount: null;
-      },
-      write: function(amount) {
-        if (amount == "") {
-          if (item.dir() == dir) {
-            item.dir(null);
-            item.amount(null);
-          }
-          return;
-        }
-        var lastDir = item.dir.peek();
-        var lastAmount = item.amount.peek() || 0;
-        amount = parseInt(amount) || 0;
-        if (lastDir == null) {
-          item.dir(dir);
-          item.amount(amount);
-        } else if (lastDir == dir) {
-          if (amount != lastAmount) {
-            item.amount(amount);
-          }
-        } else {
-          if (lastAmount > amount) {
-            item.amount(lastAmount - amount);
-          } else if (lastAmount == amount) {
-            item.dir(null);
-            item.amount(null);
-          } else {
-            item.dir(dir);
-            item.amount(amount - lastAmount);
-          }
-        }
-      },
-      owner: item
-    }).extend({notify:'always'});
-  };
   dialog.tmpl.subscribe(function(tmpl) {
     if (!tmpl) return;
     var list = dialog.value();
@@ -555,81 +358,6 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     });
   };
 
-  dialog.onDrop = function($data, event) {
-    var items = dialog.value().items;
-    var fromRow = items.indexOf(event.detail.data);
-    var toRow = items.indexOf($data);
-    if (fromRow >= 0 && toRow >= 0) {
-      var item = items.splice(fromRow, 1)[0];
-      items.splice(toRow, 0, item);
-    }
-  };
-  dialog.onKeyDown = function($data, event) {
-    var key = event.key || event.keyCode;
-    var mod = (event.ctrlKey<<0)|(event.shiftKey<<1)|(event.altKey<<2);
-    var items = dialog.value().items;
-    var elem = event.target;
-    if ((""+elem.id).indexOf("item-") != 0) return true;
-    var $context = ko.contextFor(elem);
-    var index = $context.$index(), length = items().length;
-    var id = (""+elem.id).split(/-/);
-    id[1] = +id[1];
-    id[2] = +id[2];
-    if (event.isComposing === true || event.repeat === true) {
-      return true;
-    }
-    if (key === 'ArrowUp' || key === 38) {
-      if (mod == 1) {
-        if (id[1] > 0) {
-          var item = items.splice(id[1], 1)[0];
-          id[1]--;
-          items.splice(id[1], 0, item);
-        }
-      } else {
-        return true;
-      }
-    } else if (key === 'ArrowDown' || key === 40) {
-      if (mod == 1) {
-        if (id[1] < length-1) {
-          var item = items.splice(id[1], 1)[0];
-          id[1]++;
-          items.splice(id[1], 0, item);
-        }
-      } else {
-        return true;
-      }
-    } else if (key === 'Enter' || key === 13) {
-      if (mod == 1) {
-        id[1]++;
-        id[2] = 0;
-        if (id[1] == length) {
-          items.push(new Item());
-        }
-        ko.tasks.runEarly();
-      } else if (mod == 2) {
-        if (id[1] == 0) return false;
-        id[1]--;
-      } else if (mod == 0) {
-        if (id[1] == length-1) return false;
-        id[1]++;
-      } else {
-        return true;
-      }
-    } else {
-      return true;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    elem.blur();
-    elem.focus();
-    setTimeout(function() {
-      elem = document.getElementById(id.join("-"));
-      if (elem) {
-        elem.focus();
-      }
-    }, 0);
-    return false;
-  };
   function openList(list) {
     dialog.value(null);
     Promise.resolve().then(function() {
@@ -710,18 +438,6 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
         alert("エラーが発生しました");
       }
     });
-  };
-  dialog.addItem = function() {
-    var value = dialog.value();
-    if (value) {
-      value.items.push(new Item());
-    }
-  };
-  dialog.removeItem = function($data) {
-    var value = dialog.value();
-    if (value) {
-      value.items.remove($data);
-    }
   };
   dialog.openToTmpl = function() {
     if (!dialog.value()) {

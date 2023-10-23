@@ -78,7 +78,7 @@
           <th>日付</th>
           <th>科目/摘要</th>
           <th>金額</th>
-          <th><button class="normal" data-bind="click: dialog.addList">新規</button></th>
+          <th><button class="normal" data-bind="click: addList">新規</button></th>
       </tr></thead>
       <tbody><!-- ko foreach: lists --><tr data-bind="css:{initial_lists: is_initial}">
           <td data-bind="text: date"></td>
@@ -89,7 +89,7 @@
             <!-- /ko -->
           </td>
           <td class="cell-number" data-bind="text: amount"></td>
-          <td><button class="normal" data-bind="click: $parent.dialog.editList">詳細</button></td>
+          <td><button class="normal" data-bind="click: $parent.editList">詳細</button></td>
       </tr><!-- /ko --></tbody>
     </table>
   </script>

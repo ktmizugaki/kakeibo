@@ -129,6 +129,50 @@ function TmplManager(tabbar, dialogManager, dataStore) {
   };
 }
 
+function ListDialog(dialogManager, dataStore) {
+  this.template = "template-list-form";
+  this.id = "list-dialog";
+  this.title = ko.pureComputed(this.title.bind(this));
+  this.data = {
+    dataStore: dataStore,
+    value: ko.observable(null),
+    onSave: this.close.bind(this),
+    onDel: this.close.bind(this),
+  };
+  this.handle = null;
+  this.dialogManager = dialogManager;
+  this.onDialogOpen = this.onDialogOpen.bind(this);
+  this.onDialogClose = this.onDialogClose.bind(this);
+}
+ListDialog.prototype.title = function() {
+  var value = this.data.value();
+  return value? value.id()? "仕訳の詳細": "仕訳の作成": null;
+};
+ListDialog.prototype.open = function(list) {
+  var handle = this.dialogManager.open(this);
+  if (!handle) {
+    return false;
+  }
+  this.handle = handle;
+  this.data.value(list);
+  return true;
+};
+ListDialog.prototype.close = function() {
+  if (this.handle) {
+    this.dialogManager.close(this.handle);
+  }
+};
+ListDialog.prototype.onDialogOpen = function(handle, element) {
+  element.querySelector("select, input").focus();
+};
+ListDialog.prototype.onDialogClose = function(handle) {
+  if (this.handle != handle) {
+    return;
+  }
+  this.data.value(null);
+  this.handle = null;
+};
+
 function ListManager(tabbar, dialogManager, dataStore, date) {
   var self = this;
   self.tabInfo = {label:"月仕訳一覧",template:"template-lists",data:self};
@@ -145,27 +189,33 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
       self.loadAll();
     }
   });
-  var dialog = self.dialog = {
-    template:"template-list-form",
-    id: "list-dialog",
-    dataStore: dataStore,
-    value: ko.observable(null),
-  };
-  dialog.data = dialog;
-  dialog.title = ko.pureComputed(function() {
-    var value = dialog.value();
-    return value? value.id()? "仕訳の詳細": "仕訳の作成": null;
-  });
-  dialog.onDialogOpen = function(handle, element) {
-    element.querySelector("select, input").focus();
-  };
+
+  var dialog = new ListDialog(dialogManager, dataStore);
+  var onDialogClose = dialog.onDialogClose;
   dialog.onDialogClose = function(handle) {
     if (dialog.handle != handle) {
       return;
     }
-    dialog.value(null);
-    dialog.handle = null;
+    onDialogClose(handle);
     closeToTmpl();
+  };
+  var onSave = dialog.data.onSave;
+  dialog.data.onSave = function(list) {
+    var prev = Model.arrayFind(self.lists(), list);
+    if (prev) {
+      self.lists.remove(prev);
+    }
+    self.lists.push(list);
+    self.lists.sort(compareListByDate);
+    onSave(list);
+  };
+  var onDel = dialog.data.onDel;
+  dialog.data.onDel = function(list) {
+    var prev = Model.arrayFind(self.lists(), list);
+    if (prev) {
+      self.lists.remove(prev);
+    }
+    onDel(list);
   };
 
   function compareListByDate(a,b) {
@@ -206,45 +256,16 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
     });
   };
 
-  function openList(list) {
-    dialog.value(null);
-    Promise.resolve().then(function() {
-      return list? List.get(list.id()): new List({date:self.date()});
-    }).then(function(list) {
-      var handle = dialogManager.open(dialog);
-      if (!handle) {
-        return;
-      }
-      dialog.handle = handle;
-      dialog.value(list);
+  self.addList = function() {
+    return dialog.open(new List({date:self.date()}));
+  };
+  self.editList = function() {
+    List.get(this.id()).then(function(list) {
+      dialog.open(list);
     });
     return true;
-  }
-  function closeList() {
-    if (dialog.handle) {
-      dialogManager.close(dialog.handle);
-    }
-  }
-  dialog.closeList = closeList;
-  dialog.addList = function() { return openList(); };
-  dialog.editList = function() { return openList(this); };
-  dialog.onSave = function(list) {
-    var prev = Model.arrayFind(self.lists(), list);
-    if (prev) {
-      self.lists.remove(prev);
-    }
-    self.lists.push(list);
-    self.lists.sort(compareListByDate);
-    closeList();
   };
-  dialog.onDel = function(list) {
-    var prev = Model.arrayFind(self.lists(), list);
-    if (prev) {
-      self.lists.remove(prev);
-    }
-    closeList();
-  };
-  dialog.onToTmpl = function(list) {
+  dialog.data.onToTmpl = function(list) {
     var handle = dialogManager.open(subdialog);
     if (!handle) {
       return;
@@ -258,7 +279,7 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
       dialogManager.close(subdialog.handle);
     }
   }
-  var subdialog = {
+  var subdialog = dialog.data.subdialog = {
     template:"template-list2tmpl-form",
     id: "to-tmpl-dialog",
     dataStore: dataStore,

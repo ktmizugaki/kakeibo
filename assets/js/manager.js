@@ -61,11 +61,8 @@ function TmplManager(tabbar, dialogManager, dataStore) {
   var dialog = self.dialog = {
     template:"template-tmpl-form",
     id: "tmpl-dialog",
-    kamokus: dataStore.kamokus,
-    is_saving: ko.observable(false),
+    dataStore: dataStore,
     value: ko.observable(null),
-    list: ko.observable(null),
-    edit: null,
   };
   dialog.data = dialog;
   dialog.title = ko.pureComputed(function() {
@@ -79,19 +76,9 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     if (dialog.handle != handle) {
       return;
     }
-    dialog.is_saving(false);
     dialog.value(null);
-    dialog.list(null);
-    dialog.edit = null;
     dialog.handle = null;
   };
-  dialog.items = ko.computed(function() {
-    var list = dialog.list();
-    if (!list) return [];
-    return list.items().map(function(item) {
-      return new ItemInputProxy(item, dataStore);
-    });
-  });
 
   self.loadAll = function() {
     return Promise.all([Template.all()]).then(function(res){
@@ -107,10 +94,7 @@ function TmplManager(tabbar, dialogManager, dataStore) {
     dialog.handle = handle;
     var value = new Template(tmpl&&tmpl.toObject());
     value.date = ko.observable(value.json().date);
-    dialog.is_saving(false);
     dialog.value(value);
-    dialog.list(new List(value.json()));
-    dialog.edit = tmpl;
     return true;
   }
   function closeTmpl() {
@@ -118,72 +102,10 @@ function TmplManager(tabbar, dialogManager, dataStore) {
       dialogManager.close(dialog.handle);
     }
   }
-  dialog.closeTmpl = closeTmpl;
   dialog.addTmpl = function() { return openTmpl(); };
   dialog.editTmpl = function() { return openTmpl(this); };
-  dialog.saveTmpl = function() {
-    var value = dialog.value();
-    var list = dialog.list();
-    var edit = dialog.edit;
-    if (!value) return;
-    var date = value.date() || undefined;
-    if (date != undefined && date != '') {
-      var datenum = parseInt(date);
-      if (date != 'E' && (!date.match(/^[0-9]+$/) || datenum < 1 || datenum > 31)) {
-        console.error('invalid date for template', date);
-        value.errors({date: ['is not valid']});
-        dialog.is_saving(false);
-        return;
-      }
-    }
-    dialog.is_saving(true);
-    var items = list.toParams().items;
-    value.json({date:date,items:items});
-    value.save().then(function(tmpl) {
-      if (edit) {
-        edit.assign(tmpl.toObject());
-        dataStore.pushTmpl(edit);
-      } else {
-        dataStore.pushTmpl(tmpl);
-      }
-      if (value == dialog.value()) {
-        dialog.is_saving(false);
-        closeTmpl();
-      }
-    }).catch(function(err) {
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      if (err.errors) {
-      } else {
-        alert("エラーが発生しました");
-      }
-    });
-  };
-  dialog.delTmpl = function() {
-    var value = dialog.value();
-    var edit = dialog.edit;
-    if (!edit || !edit.id()) return;
-    if (!confirm("ひな型「"+value.name()+"」を削除しますか？")) {
-      return;
-    }
-    dialog.is_saving(true);
-    edit.destroy().then(function(tmpl) {
-      dataStore.removeTmpl(edit);
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      closeTmpl();
-    }).catch(function(err) {
-      if (value != dialog.value()) return;
-      dialog.is_saving(false);
-      if (err.errors) {
-      } else if (err && err.status == 404) {
-        dataStore.removeTmpl(edit);
-        closeTmpl();
-      } else {
-        alert("エラーが発生しました");
-      }
-    });
-  };
+  dialog.onSave = closeTmpl;
+  dialog.onDel = closeTmpl;
 }
 
 function ListManager(tabbar, dialogManager, dataStore, date) {

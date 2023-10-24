@@ -279,7 +279,7 @@ function SummaryManager(tabbar, dialogManager, dataStore, date) {
   var dialog = self.dialog = {
     template:"template-carryover-form",
     id: "list-dialog",
-    is_saving: ko.observable(false),
+    dataStore: dataStore,
     value: ko.observable(null),
   };
   dialog.data = dialog;
@@ -293,7 +293,6 @@ function SummaryManager(tabbar, dialogManager, dataStore, date) {
     if (dialog.handle != handle) {
       return;
     }
-    dialog.is_saving(false);
     dialog.value(null);
     dialog.handle = null;
   };
@@ -436,20 +435,7 @@ function SummaryManager(tabbar, dialogManager, dataStore, date) {
       dialogManager.close(dialog.handle);
     }
   }
-  dialog.closeList = closeList;
-  dialog.saveList = function() {
-    var value = dialog.value();
-    dialog.is_saving(true);
-    value.save().then(function(list) {
-      list.items().forEach(function(item) {
-        item.kamoku = dataStore.computedKamoku(item.kamoku_id);
-      });
-      closeList();
-    }).catch(function(err) {
-      alert("エラーが発生しました");
-      closeList();
-    });
-  };
+  dialog.onSave = closeList;
 }
 
 function ByKamokuManager(tabbar, dialogManager, dataStore, date) {

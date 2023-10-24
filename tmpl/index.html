@@ -155,41 +155,7 @@
     </table>
   </script>
   <script type="text/html" id="template-carryover-form">
-    <form data-bind="submit: saveList, with: value()">
-      <div class="form-group">
-        <label class="form-label">日付</label>
-        <span class="date form-input" data-bind="text: date"></span>
-      </div>
-      <table border="1">
-        <colgroup>
-          <col class="col-kamoku-code">
-          <col class="col-desc">
-          <col class="col-amount">
-          <col class="col-amount">
-        </colgroup>
-        <thead><tr>
-          </tr><tr>
-            <th>科目</th>
-            <th>摘要</th>
-            <th>借方</th>
-            <th>貸方</th>
-        </tr></thead>
-        <tbody><!-- ko foreach: items --><tr>
-            <td class="cell-number" data-bind="text: kamoku().code()"></td>
-            <td data-bind="text: desc() || kamoku().name()"></td>
-            <td class="cell-number" data-bind="text: kasiAmount()"></td>
-            <td class="cell-number" data-bind="text: kariAmount()"></td>
-          </tr><!-- /ko --><tr>
-            <td class="cell-number" colspan="2">計</td>
-            <td class="cell-number" data-bind="text: kasiAmount"></td>
-            <td class="cell-number" data-bind="text: kariAmount"></td>
-        </tr></tbody>
-      </table>
-
-      <span class="form-group form-submit">
-        <button type="submit" class="normal" data-bind="text: $parent.is_saving()? '保存中...': '作成', disable: $parent.is_saving">&nbsp;</button>
-      </span>
-    </form>
+  <!-- ko component: {name:'carryover-form', params:$data} --><!-- /ko -->
   </script>
   <script type="text/html" id="template-bykamoku">
     <h2>科目別</h2>

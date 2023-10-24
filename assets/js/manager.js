@@ -313,6 +313,88 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
   };
 }
 
+function CarryOverDialog(dialogManager, dataStore) {
+  this.template = "template-carryover-form";
+  this.id = "list-dialog";
+  this.title = ko.pureComputed(this.title.bind(this));
+  this.data = {
+    dataStore: dataStore,
+    value: ko.observable(null),
+    onSave: this.close.bind(this),
+  };
+  this.handle = null;
+  this.dialogManager = dialogManager;
+  this.dataStore = dataStore;
+  this.onDialogOpen = this.onDialogOpen.bind(this);
+  this.onDialogClose = this.onDialogClose.bind(this);
+}
+CarryOverDialog.prototype.title = function() {
+  return this.data.value().date() + "への繰越の作成";
+};
+CarryOverDialog.prototype.open = function(summary, date) {
+  var handle = this.dialogManager.open(this);
+  if (!handle) {
+    return false;
+  }
+  this.handle = handle;
+  var dataStore = this.dataStore;
+  var list = new List();
+  list.date(date2str(new Date(next_month(date))));
+  var carry = new Item();
+  var carry_amount = 0;
+  dataStore.kamokus().forEach(function(kamoku) {
+    if (kamoku.category_id() == 4 && !carry.kamoku) {
+      carry.kamoku_id(kamoku.id());
+      carry.kamoku = dataStore.computedKamoku(carry.kamoku_id);
+    }
+  });
+  list.items.push(carry);
+  summary.forEach(function(row) {
+    var category_id = row.kamoku().category().id();
+    if (category_id == 1 || category_id == 3) {
+      var item = new Item();
+      var amount = row.finalAmount();
+      if (amount == 0) return;
+      carry_amount += amount;
+      item.kamoku_id = row.kamoku_id;
+      item.kamoku = row.kamoku;
+      if (amount < 0) {
+        item.dir(-1);
+        item.amount(-amount);
+      } else {
+        item.dir(1);
+        item.amount(amount);
+      }
+      list.items.push(item);
+    }
+  });
+  if (carry_amount > 0) {
+    carry.dir(-1);
+    carry.amount(carry_amount);
+  } else if (carry_amount < 0) {
+    carry.dir(1);
+    carry.amount(-carry_amount);
+  } else {
+    list.items.remove(carry);
+  }
+  this.data.value(list);
+};
+CarryOverDialog.prototype.close = function() {
+  if (this.handle) {
+    this.dialogManager.close(this.handle);
+  }
+};
+CarryOverDialog.prototype.onDialogOpen = function(handle, element) {
+  element.querySelector(".dialog-body button").focus();
+};
+CarryOverDialog.prototype.onDialogClose = function(handle) {
+  if (this.handle != handle) {
+    return;
+  }
+  this.data.value(null);
+  this.handle = null;
+};
+
 function SummaryManager(tabbar, dialogManager, dataStore, date) {
   var self = this;
   self.tabInfo = {label:"月集計",template:"template-summary",data:self};
@@ -329,26 +411,7 @@ function SummaryManager(tabbar, dialogManager, dataStore, date) {
       self.load();
     }
   });
-  var dialog = self.dialog = {
-    template:"template-carryover-form",
-    id: "list-dialog",
-    dataStore: dataStore,
-    value: ko.observable(null),
-  };
-  dialog.data = dialog;
-  dialog.title = ko.pureComputed(function() {
-    return dialog.value().date() + "への繰越の作成";
-  });
-  dialog.onDialogOpen = function(handle, element) {
-    element.querySelector(".dialog-body button").focus();
-  };
-  dialog.onDialogClose = function(handle) {
-    if (dialog.handle != handle) {
-      return;
-    }
-    dialog.value(null);
-    dialog.handle = null;
-  };
+
   [
     "initialAmount", "finalAmount",
     "kasiLeftAmount", "kariLeftAmount",
@@ -433,62 +496,10 @@ function SummaryManager(tabbar, dialogManager, dataStore, date) {
     return Model.comparator(a.kamoku(), b.kamoku());
   }
 
+  var dialog = new CarryOverDialog(dialogManager, dataStore);
   self.makeCarryOver = function() {
-    if (dialog.handle) return;
-    var handle = dialogManager.open(dialog);
-    if (!handle) {
-      return;
-    }
-    dialog.handle = handle;
-    var list = new List();
-    list.date(date2str(new Date(next_month(self.date()))));
-    var carry = new Item();
-    var carry_amount = 0;
-    dataStore.kamokus().forEach(function(kamoku) {
-      if (kamoku.category_id() == 4 && !carry.kamoku) {
-        carry.kamoku_id(kamoku.id());
-        carry.kamoku = dataStore.computedKamoku(carry.kamoku_id);
-      }
-    });
-    list.items.push(carry);
-    self.summary().forEach(function(row) {
-      var category_id = row.kamoku().category().id();
-      if (category_id == 1 || category_id == 3) {
-        var item = new Item();
-        var amount = row.finalAmount();
-        if (amount == 0) return;
-        carry_amount += amount;
-        item.kamoku_id = row.kamoku_id;
-        item.kamoku = row.kamoku;
-        if (amount < 0) {
-          item.dir(-1);
-          item.amount(-amount);
-        } else {
-          item.dir(1);
-          item.amount(amount);
-        }
-        list.items.push(item);
-      }
-    });
-    if (carry_amount > 0) {
-      carry.dir(-1);
-      carry.amount(carry_amount);
-    } else if (carry_amount < 0) {
-      carry.dir(1);
-      carry.amount(-carry_amount);
-    } else {
-      list.items.remove(carry);
-    }
-    dialog.value(list);
-    return true;
+    return dialog.open(self.summary(), self.date());
   };
-
-  function closeList() {
-    if (dialog.handle) {
-      dialogManager.close(dialog.handle);
-    }
-  }
-  dialog.onSave = closeList;
 }
 
 function ByKamokuManager(tabbar, dialogManager, dataStore, date) {

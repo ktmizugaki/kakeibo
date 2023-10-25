@@ -1,0 +1,45 @@
+<h2>科目別</h2>
+<form data-bind="submit: load, with: search">
+  <div class="error" data-bind="visible: errors">入力内容に誤りがあります</div>
+  <div class="form-group">
+    <label for="date-from" class="form-label">期間</label>
+    <input id="date-from" type="text" class="month form-input" data-bind="textInput: date_from, css: {error: error_for('date_from')}"><button class="normal" type="button" data-bind="calendarButton: {date: date_from, title: '期間 開始'}"><span class="icomoon icon-calendar"></button> ～ <input id="date-to" type="text" class="month form-input" data-bind="textInput: date_to, css: {error: error_for('date_to')}"><button class="normal" type="button" data-bind="calendarButton: {date: date_to, title: '期間 終了'}"><span class="icomoon icon-calendar"></button>
+    <div data-bind="foreach: error_for('date_from')"><span class="error" data-bind="text:$data"></span><br></div>
+    <div data-bind="foreach: error_for('date_to')"><span class="error" data-bind="text:$data"></span><br></div>
+  </div>
+  <div class="form-group">
+    <label for="kamoku" class="form-label">科目</label>
+    <select id="kamoku" type="text" class="kamoku form-input" data-bind="value: kamoku, options: kamokus, optionsText: function(item){return item.code()+' '+item.name();}, optionsCaption: ' ', css: {error: error_for('kamoku')}"></select>
+    <div data-bind="foreach: error_for('kamoku')"><span class="error" data-bind="text:$data"></span><br></div>
+  </div>
+  <span class="form-group form-submit">
+    <button class="normal" type="submit">更新</button>
+  </span>
+</form>
+<table border="1">
+  <colgroup>
+    <col class="col-date">
+    <col class="col-kamoku-desc">
+    <col class="col-amount">
+    <col class="col-amount">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>日付</th>
+      <th>科目/摘要</th>
+      <th>金額</th>
+      <th>累計</th>
+    </tr>
+  </thead>
+  <tbody data-bind="foreach: items">
+    <tr data-bind="css:{initial_lists: $data.is_initial}">
+      <td data-bind="text: date"></td>
+      <td>
+        <span class="nobreak" data-bind="text: kamoku().name()"></span>
+        <span class="nobreak" data-bind="text: desc"></span>
+      </td>
+      <td class="cell-number" data-bind="text: dir()*amount()"></td>
+      <td class="cell-number" data-bind="text: sum"></td>
+    </tr>
+  </tbody>
+</table>

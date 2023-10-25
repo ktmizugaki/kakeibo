@@ -12,7 +12,7 @@ var page = (function(_global) {
   var tmpls = new TmplsPage(tab, dialogManager, dataStore);
   var lists = new ListsPage(tab, dialogManager, dataStore, date);
   var summary = new SummaryPage(tab, dialogManager, dataStore, date);
-  var bykamoku = new ByKamokuManager(tab, dialogManager, dataStore, date);
+  var bykamoku = new ByKamokuPage(tab, dialogManager, dataStore, date);
   var data = {
     tab: tab,
     dialogManager: dialogManager,

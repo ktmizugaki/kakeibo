@@ -772,7 +772,7 @@ function ListManager(tabbar, dialogManager, dataStore, date) {
         delete item.dir;
         delete item.amount;
       });
-      value.json(list.items);
+      value.json({items:list.items});
     }
     value.save().then(function(tmpl) {
       if (value == subdialog.value()) {

@@ -186,9 +186,20 @@ Template.error_aliases = {
 };
 Template.inherits = Model.inherits;
 Template.inherits(Model);
+Template.normalize_json = function(json) {
+  if (json instanceof Array) {
+    /* for backword compatibility */
+    json = {items: json};
+  }
+  if (!json.items) {
+    json.items = [];
+  }
+  return json;
+};
 Template.prototype.json = {
-  read: function() { try { return JSON.parse(this.text()); }catch(e){ return {items:[]}; } },
-  write: function(json) { return this.text(JSON.stringify(json)); }
+  read: function() {try {return Template.normalize_json(JSON.parse(this.text()));} catch(e){return {items:[]};}},
+  write: function(json) {return this.text(JSON.stringify(Template.normalize_json(json)));
+  }
 };
 Template.prototype.compareTo = function(o) {
   if (this.name() < o.name()) return -1;

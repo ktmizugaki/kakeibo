@@ -30,60 +30,8 @@
   <script type="text/html" id="template-list2tmpl-form">
   <!-- ko component: {name:'list2tmpl-form', params:$data} --><!-- /ko -->
   </script>
-  <script type="text/html" id="template-summary">
-    <h2>月集計</h2>
-    <form action="javascript:void(0)">
-      <div class="form-group">
-        <button class="normal" type="button" data-bind="click: prevDate">&lt;</button>
-        <input id="lists-date" type="text" class="date form-input" data-bind="value: date">
-        <button class="normal" type="button" data-bind="calendarButton: {date: date}"><span class="icomoon icon-calendar"></button>
-        <button class="normal" type="button" data-bind="click: load"><span class="icomoon icon-spinner11"></button>
-        <button class="normal" type="button" data-bind="click: nextDate">&gt;</button>
-        &nbsp;
-        <button class="normal" type="button" data-bind="visible: ko.pureComputed(function(){return is_month_str(date());}), click: makeCarryOver">繰越仕訳の作成</button>
-      </div>
-    </form>
-    <table border="1">
-      <colgroup>
-        <col class="col-category">
-        <col class="col-kamoku">
-        <col class="col-amount">
-        <col class="col-amount">
-        <col class="col-amount">
-        <col class="col-amount">
-        <col class="col-amount">
-        <col class="col-amount">
-      </colgroup>
-      <thead><tr>
-          <th>分類</th>
-          <th>科目</th>
-          <th colspan="1">開始</th>
-          <th colspan="2">借方</th>
-          <th colspan="2">貸方</th>
-          <th colspan="1">計</th>
-      </tr></thead>
-      <tbody><!-- ko foreach: summary --><tr>
-          <td data-bind="text: kamoku().category().name()"></td>
-          <td>
-            <span data-bind="text: kamoku().code()" style="display:inline-block; width: 3em"></span>
-            <span data-bind="text: kamoku().name()" style="display:inline-block; width: 10em"></span>
-          </td>
-          <td class="cell-number" data-bind="text: initialAmount"></td>
-          <td class="cell-number" data-bind="text: kasiLeftAmount"></td>
-          <td class="cell-number" data-bind="text: kasiRightAmount"></td>
-          <td class="cell-number" data-bind="text: kariLeftAmount"></td>
-          <td class="cell-number" data-bind="text: kariRightAmount"></td>
-          <td class="cell-number" data-bind="text: finalAmount"></td>
-      </tr><!-- /ko --><tr>
-          <td colspan="2" class="cell-number">計</td>
-          <td class="cell-number" data-bind="text: initialAmount"></td>
-          <td class="cell-number" data-bind="text: kasiLeftAmount"></td>
-          <td class="cell-number" data-bind="text: kasiRightAmount"></td>
-          <td class="cell-number" data-bind="text: kariLeftAmount"></td>
-          <td class="cell-number" data-bind="text: kariRightAmount"></td>
-          <td class="cell-number" data-bind="text: finalAmount"></td>
-      </tr></tbody>
-    </table>
+  <script type="text/html" id="template-summary-page">
+  <!-- ko component: {name:'summary-page', params:$data} --><!-- /ko -->
   </script>
   <script type="text/html" id="template-carryover-form">
   <!-- ko component: {name:'carryover-form', params:$data} --><!-- /ko -->

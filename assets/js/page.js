@@ -11,7 +11,7 @@ var page = (function(_global) {
   var kamokus = new KamokusPage(tab, dialogManager, dataStore);
   var tmpls = new TmplsPage(tab, dialogManager, dataStore);
   var lists = new ListsPage(tab, dialogManager, dataStore, date);
-  var summary = new SummaryManager(tab, dialogManager, dataStore, date);
+  var summary = new SummaryPage(tab, dialogManager, dataStore, date);
   var bykamoku = new ByKamokuManager(tab, dialogManager, dataStore, date);
   var data = {
     tab: tab,

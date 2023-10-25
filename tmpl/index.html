@@ -15,24 +15,8 @@
   <script type="text/html" id="template-kamoku-form">
   <!-- ko component: {name:'kamoku-form', params:$data} --><!-- /ko -->
   </script>
-  <script type="text/html" id="template-tmpls">
-    <h2>ひな形</h2>
-    <table border="1">
-      <colgroup>
-        <col class="col-tmpl-name">
-        <col class="col-tmpl-desc">
-      </colgroup>
-      <thead><tr>
-          <th>名称</th>
-          <th>説明</th>
-          <th><button class="normal" data-bind="click: addTmpl">追加</button></th>
-      </tr></thead>
-      <tbody data-bind="foreach: tmpls"><tr>
-          <td data-bind="text: name"></td>
-          <td data-bind="text: desc"></td>
-          <td><button class="normal" data-bind="click: $parent.editTmpl">編集</button></td>
-      </tr></tbody>
-    </table>
+  <script type="text/html" id="template-tmpls-page">
+  <!-- ko component: {name:'tmpls-page', params:$data} --><!-- /ko -->
   </script>
   <script type="text/html" id="template-tmpl-form">
   <!-- ko component: {name:'tmpl-form', params:$data} --><!-- /ko -->

@@ -9,28 +9,8 @@
   <script type="text/javascript" src="js/kakeibo.js"></script>
   <script type="text/html" id="template-empty">
   </script>
-  <script type="text/html" id="template-kamokus">
-    <h2>勘定科目</h2>
-    <table border="1">
-      <colgroup>
-        <col class="col-category">
-        <col class="col-kamoku-code">
-        <col class="col-kamoku-name">
-      </colgroup>
-      <thead><tr>
-          <th>分類</th>
-          <th>コード</th>
-          <th>名称</th>
-          <th><button class="normal" data-bind="click: addKamoku">追加</button></th>
-      </tr></thead>
-      <tbody data-bind="foreach: categories"><tr>
-          <td data-bind="text: name, attr:{rowspan:kamokus().length+1,colspan:kamokus().length?1:0}"></td>
-      </tr><!-- ko foreach: kamokus --><tr>
-          <td class="cell-number" data-bind="text: code"></td>
-          <td data-bind="text: name"></td>
-          <td><button class="normal" data-bind="click: $parents[1].editKamoku">編集</button></td>
-      </tr><!-- /ko --></tbody>
-    </table>
+  <script type="text/html" id="template-kamokus-page">
+  <!-- ko component: {name:'kamokus-page', params:$data} --><!-- /ko -->
   </script>
   <script type="text/html" id="template-kamoku-form">
   <!-- ko component: {name:'kamoku-form', params:$data} --><!-- /ko -->

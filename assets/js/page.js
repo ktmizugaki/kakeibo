@@ -8,7 +8,7 @@ var page = (function(_global) {
   var date = ko.observable(params.get("date") || month2str(new Date()));
   date.subscribe(function(date) { params.set("date", date); });
   params.query.extend({rateLimit:10}).subscribe(function() { var d = params.get("date"); if (d) date(d); });
-  var kamokus = new KamokuManager(tab, dialogManager, dataStore);
+  var kamokus = new KamokusPage(tab, dialogManager, dataStore);
   var tmpls = new TmplManager(tab, dialogManager, dataStore);
   var lists = new ListManager(tab, dialogManager, dataStore, date);
   var summary = new SummaryManager(tab, dialogManager, dataStore, date);

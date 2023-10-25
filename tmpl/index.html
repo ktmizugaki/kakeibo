@@ -21,41 +21,8 @@
   <script type="text/html" id="template-tmpl-form">
   <!-- ko component: {name:'tmpl-form', params:$data} --><!-- /ko -->
   </script>
-  <script type="text/html" id="template-lists">
-    <h2>月仕訳一覧</h2>
-    <form action="javascript:void(0)">
-      <div class="form-group">
-        <button class="normal" type="button" data-bind="click: prevDate">&lt;</button>
-        <input id="lists-date" type="text" class="date form-input" data-bind="textInput: date">
-        <button class="normal" type="button" data-bind="calendarButton: {date: date}"><span class="icomoon icon-calendar"></button>
-        <button class="normal" type="button" data-bind="click: loadAll"><span class="icomoon icon-spinner11"></button>
-        <button class="normal" type="button" data-bind="click: nextDate">&gt;</button>
-      </div>
-    </form>
-    <table border="1">
-      <colgroup>
-        <col class="col-date">
-        <col class="col-kamoku-desc">
-        <col class="col-amount">
-      </colgroup>
-      <thead><tr>
-          <th>日付</th>
-          <th>科目/摘要</th>
-          <th>金額</th>
-          <th><button class="normal" data-bind="click: addList">新規</button></th>
-      </tr></thead>
-      <tbody><!-- ko foreach: lists --><tr data-bind="css:{initial_lists: is_initial}">
-          <td data-bind="text: date"></td>
-          <td>
-            <!-- ko if: repr() -->
-            <span class="nobreak" data-bind="text: repr().kamoku().name()"></span>
-            <span class="nobreak" data-bind="text: repr().desc"></span>
-            <!-- /ko -->
-          </td>
-          <td class="cell-number" data-bind="text: amount"></td>
-          <td><button class="normal" data-bind="click: $parent.editList">詳細</button></td>
-      </tr><!-- /ko --></tbody>
-    </table>
+  <script type="text/html" id="template-lists-page">
+  <!-- ko component: {name:'lists-page', params:$data} --><!-- /ko -->
   </script>
   <script type="text/html" id="template-list-form">
   <!-- ko component: {name:'list-form', params:$data} --><!-- /ko -->

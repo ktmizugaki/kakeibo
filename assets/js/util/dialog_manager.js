@@ -16,7 +16,7 @@ function koDialogManager(options) {
             '<span data-bind="text: title"></span>'+
             '<button class="icon dialog-close" data-bind="click: function(){$parent.close($data)}">×</button>'+
           '</div>'+
-          '<div class="dialog-body" data-bind="template: {name:template,data:data}"></div>'+
+          '<div class="dialog-body" data-bind="component: {name: component, params: data}"></div>'+
         '</div>'+
       '</div>'),
     foreach: manager.dialogs,
@@ -68,7 +68,7 @@ koDialogManager.methods = {
     return this.dialogs().length > 0;
   },
   open: function(dialogInfo) {
-    if (!dialogInfo.template) {
+    if (!dialogInfo.template && !dialogInfo.component) {
       throw "dialog.open: invalid daialogInfo";
     }
     if (dialogInfo.id) {
@@ -78,7 +78,14 @@ koDialogManager.methods = {
         return null;
       }
     }
-    var handle = ko.utils.extend({}, dialogInfo);
+    var handle = ko.utils.extend({}, dialogInfo);;
+    if (!dialogInfo.component && dialogInfo.template) {
+      handle.component = 'component-template-adapter';
+      handle.data = {
+        name: dialogInfo.template,
+        data: dialogInfo.data,
+      };
+    }
     this.dialogs.push(handle);
     return handle;
   },

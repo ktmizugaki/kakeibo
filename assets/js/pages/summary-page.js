@@ -1,5 +1,5 @@
 function CarryOverDialog(dialogManager, dataStore) {
-  this.template = "template-carryover-form";
+  this.component = "carryover-form";
   this.id = "list-dialog";
   this.title = ko.pureComputed(this.title.bind(this));
   this.data = {

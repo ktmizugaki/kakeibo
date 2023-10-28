@@ -1,5 +1,5 @@
 function KamokuDialog(dialogManager, dataStore) {
-  this.template = "template-kamoku-form";
+  this.component = "kamoku-form";
   this.id = "kamoku-dialog";
   this.title = ko.pureComputed(this.title.bind(this));
   this.data = {

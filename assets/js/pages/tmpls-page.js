@@ -1,5 +1,5 @@
 function TmplDialog(dialogManager, dataStore) {
-  this.template = "template-tmpl-form";
+  this.component = "tmpl-form";
   this.id = "tmpl-dialog";
   this.title = ko.pureComputed(this.title.bind(this));
   this.data = {

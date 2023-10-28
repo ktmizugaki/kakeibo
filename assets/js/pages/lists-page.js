@@ -1,5 +1,5 @@
 function ListDialog(dialogManager, dataStore) {
-  this.template = "template-list-form";
+  this.component = "list-form";
   this.id = "list-dialog";
   this.title = ko.pureComputed(this.title.bind(this));
   this.data = {
@@ -43,7 +43,7 @@ ListDialog.prototype.onDialogClose = function(handle) {
 };
 
 function ListToTmplDialog(dialogManager, dataStore) {
-  this.template = "template-list2tmpl-form";
+  this.component = "list2tmpl-form";
   this.id = "to-tmpl-dialog";
   this.title = ko.observable("ひな型として保存");
   this.data = {

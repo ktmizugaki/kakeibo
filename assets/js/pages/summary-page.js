@@ -82,7 +82,7 @@ CarryOverDialog.prototype.onDialogClose = function(handle) {
 
 function SummaryPage(tabbar, dialogManager, dataStore, date) {
   var self = this;
-  self.tabInfo = {label:"月集計",template:"template-summary-page",data:self};
+  self.tabInfo = {label:"月集計",component:"summary-page",data:self};
   self.tabInfo.onChange = function(tab, selected, name) {
     if (selected) {
       self.load();

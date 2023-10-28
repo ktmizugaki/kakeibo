@@ -46,7 +46,7 @@ KamokuDialog.prototype.onDialogClose = function(handle) {
 };
 
 function KamokusPage(tabbar, dialogManager, dataStore) {
-  this.tabInfo = {label:"勘定科目",template:"template-kamokus-page",data:this};
+  this.tabInfo = {label:"勘定科目",component:"kamokus-page",data:this};
   this.categories = dataStore.categories;
   this.kamokus = dataStore.kamokus;
   this.loadAll = function() {

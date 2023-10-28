@@ -18,8 +18,8 @@ function koTabbar(options) {
   tab.current = ko.pureComputed(m.current, tab);
 
   tab.empty = {
-    name: options.templateEmpty || null,
-    data: options.dataEmpy,
+    name: options.emptyComponent || 'empty',
+    data: options.emptyData,
   };
   tab.tabbar = {
     name: options.templateTabbar,
@@ -31,11 +31,7 @@ function koTabbar(options) {
       '</div>'),
     data: tab,
   };
-  tab.content = {
-    name: ko.pureComputed(m.contentTemplateName, tab),
-    nodes: ko.utils.parseHtmlFragment(""),
-    data: ko.pureComputed(m.contentTemplateData, tab),
-  };
+  tab.content = ko.pureComputed(m.content, tab);
   if (options.tabs) {
     options.tabs.forEach(function(tabInfo) {tab.addTab(tabInfo)});
   }
@@ -44,7 +40,7 @@ function koTabbar(options) {
 koTabbar.tabId = 0;
 koTabbar.methods = {
   addTab: function(newTabInfo) {
-    if (!newTabInfo.name || !newTabInfo.label || !newTabInfo.template) {
+    if (!newTabInfo.name || !newTabInfo.label || (!newTabInfo.template&&!newTabInfo.component)) {
       throw "addTab: invalid tabInfo";
     }
     if (newTabInfo.name in this.map) {
@@ -80,12 +76,16 @@ koTabbar.methods = {
     }
     return this.map[selected] || null;
   },
-  contentTemplateName: function() {
+  content: function() {
     var current = this.current();
-    return current? current.template: "template-empty";
-  },
-  contentTemplateData: function() {
-    var current = this.current();
-    return current? ko.unwrap(current.data): this.empty.data;
+    if (current) {
+      if (current.component) {
+        return {name: current.component, params: current.data};
+      }
+      var data = {name: current.template, data: current.data};
+      return {name: 'component-template-adapter', params: data};
+    } else {
+      return {name: this.empty.name, params: this.empty.data};
+    }
   },
 };

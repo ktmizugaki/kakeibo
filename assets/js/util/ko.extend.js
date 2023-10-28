@@ -208,6 +208,10 @@ ko.bindingHandlers.draggable = (function koDraggable(){
 })();
 ko.virtualElements.allowedBindings['draggable'] = true;
 
+ko.components.register('empty', {
+  template: ko.utils.parseHtmlFragment(''),
+});
+
 ko.components.register('component-template-adapter', {
   template: ko.utils.parseHtmlFragment('<!-- ko template: $data --><!-- /ko -->'),
 });

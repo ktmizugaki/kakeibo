@@ -86,7 +86,7 @@ ListToTmplDialog.prototype.onDialogClose = function(handle) {
 
 function ListsPage(tabbar, dialogManager, dataStore, date) {
   var self = this;
-  self.tabInfo = {label:"月仕訳一覧",template:"template-lists-page",data:self};
+  self.tabInfo = {label:"月仕訳一覧",component:"lists-page",data:self};
   self.tabInfo.onChange = function(tab, selected, name) {
     if (selected) {
       self.loadAll();

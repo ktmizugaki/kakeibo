@@ -7,23 +7,6 @@
   <script type="text/javascript" src="js/polyfill.js"></script>
   <script type="text/javascript" src="js/lib.js"></script>
   <script type="text/javascript" src="js/kakeibo.js"></script>
-  <script type="text/html" id="template-empty">
-  </script>
-  <script type="text/html" id="template-kamokus-page">
-  <!-- ko component: {name:'kamokus-page', params:$data} --><!-- /ko -->
-  </script>
-  <script type="text/html" id="template-tmpls-page">
-  <!-- ko component: {name:'tmpls-page', params:$data} --><!-- /ko -->
-  </script>
-  <script type="text/html" id="template-lists-page">
-  <!-- ko component: {name:'lists-page', params:$data} --><!-- /ko -->
-  </script>
-  <script type="text/html" id="template-summary-page">
-  <!-- ko component: {name:'summary-page', params:$data} --><!-- /ko -->
-  </script>
-  <script type="text/html" id="template-bykamoku-page">
-  <!-- ko component: {name:'bykamoku-page', params:$data} --><!-- /ko -->
-  </script>
   <script type="text/html" id="template-datepick-dialog">
     <div data-bind="component: {name: 'calendar', params: params}"></div>
     <form>
@@ -37,7 +20,7 @@
 </head>
 <body onLoad="page.init()" data-bind="css:{'open-dialog':dialogManager.is_open}">
   <div data-bind="template: tab.tabbar"></div>
-  <div id="main" data-bind="template: tab.content"></div>
+  <div id="main" data-bind="component: tab.content"></div>
   <!-- ko template: dialogManager --><!-- /ko -->
 </body>
 </html>

@@ -1,6 +1,6 @@
 function ByKamokuPage(tabbar, dialogManager, dataStore, date) {
   var self = this;
-  self.tabInfo = {label:"科目別",template:"template-bykamoku-page",data:self};
+  self.tabInfo = {label:"科目別",component:"bykamoku-page",data:self};
   self.search = new ByKamoku({
     date_from: params.get("date_from") || date() || month2str(new Date()),
     date_to: params.get("date_to") || date() || month2str(new Date()),

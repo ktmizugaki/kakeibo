@@ -45,7 +45,7 @@ TmplDialog.prototype.onDialogClose = function(handle) {
 };
 
 function TmplsPage(tabbar, dialogManager, dataStore) {
-  this.tabInfo = {label:"ひな型",template:"template-tmpls-page",data:this};
+  this.tabInfo = {label:"ひな型",component:"tmpls-page",data:this};
   this.tmpls = dataStore.tmpls;
   this.loadAll = function() {
     return Promise.all([Template.all()]).then(function(res){

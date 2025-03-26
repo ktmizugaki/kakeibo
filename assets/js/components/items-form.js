@@ -74,8 +74,20 @@ ItemsForm.prototype.onKeyDown = function($data, event) {
 ItemsForm.prototype.addItem = function($data) {
   this.list().items.push(new Item());
 };
-ItemsForm.prototype.removeItem = function($data) {
+ItemsForm.prototype.removeItem = function($data, event) {
   this.list().items.remove($data._item);
+  var id = (""+event.target.id).split(/-/);
+  if (id[0] === "item") {
+    id[1] = +id[1];
+    id[2] = +id[2];
+    setTimeout(function() {
+      var elem = document.getElementById(id.join("-"));
+      console.log(id.join("-"), elem);
+      if (elem) {
+        elem.focus();
+      }
+    }, 0);
+  }
 };
 ItemsForm.prototype.moveToPrevious = function($data) {
   var pos = this.items().indexOf($data);

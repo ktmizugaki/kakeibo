@@ -23,7 +23,7 @@
       <td><input type="text" class="form-input" data-bind="textInput: desc, css:{error:error_for('desc')}, attr:{placeholder: kamoku_name, id:'item-'+$index()+'-1'}"></td>
       <td><input type="number" class="form-number form-input" data-bind="value: kasiInput, css:{error:error_for('amount')}, attr:{id:'item-'+$index()+'-2'}"></td>
       <td><input type="number" class="form-number form-input" data-bind="value: kariInput, css:{error:error_for('amount')}, attr:{id:'item-'+$index()+'-3'}"></td>
-      <td><button class="icon" type="button" data-bind="click: $parent.removeItem">－</button></td>
+      <td><button class="icon" type="button" data-bind="click: $parent.removeItem, attr:{id:'item-'+$index()+'-4'}">－</button></td>
     </tr><tr data-bind="if: errors">
       <td colspan="5">
         <div data-bind="foreach: error_for('kamoku')"><span class="error" data-bind="text:$data"></span><br></div>

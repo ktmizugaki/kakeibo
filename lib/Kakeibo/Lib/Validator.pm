@@ -137,11 +137,11 @@ sub validate_numericality {
     if (defined($val)) {
         my $ok;
         my $msg;
-        if ($params eq "integer" || (ref $params eq "HASH" && $params->{only_integer_only})) {
-            $ok = $val =~ /^[+-]?(?:[1-9]\d*|0)$/;
+        if ($params eq "integer" || (ref $params eq "HASH" && $params->{only_integer})) {
+            $ok = $val =~ /^[+-]?(?:0|[1-9][0-9]*)$/;
             $msg = "is not a integer";
         } else {
-            $ok = $val =~ /^(?:0|[1-9][0-9]*)(?:|\.[0-9]+)$/;
+            $ok = $val =~ /^[+-]?(?:0|[1-9][0-9]*)(?:|\.[0-9]+)$/;
             $msg = "is not a number";
         }
         if (!$ok) {
@@ -150,10 +150,10 @@ sub validate_numericality {
         } elsif (ref $params eq "HASH") {
             my $thr;
             if (defined($thr = $params->{min}) && $val < $thr) {
-                add_error($hash, $prop, $thr==0?"is not a positive number": "too small($thr)");
+                add_error($hash, $prop, $thr==0?"is not a positive number": "is too small($thr)");
                 return 0;
             } elsif (defined($thr = $params->{max}) && $val > $thr) {
-                add_error($hash, $prop, $thr==0?"is not a negative number": "too large($thr)");
+                add_error($hash, $prop, $thr==0?"is not a negative number": "is too large($thr)");
                 return 0;
             }
         }

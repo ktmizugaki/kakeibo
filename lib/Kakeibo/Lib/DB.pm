@@ -14,6 +14,11 @@ my $dbsrc = "dbi:SQLite:dbname=kakeibo.db";
 my $dbh;
 my $in_trans = 0;
 
+sub setdb {
+    my ($dbname) = @_;
+    $dbsrc = "dbi:SQLite:dbname=$dbname.db";
+}
+
 sub connection {
     if (!$dbh) {
         $dbh = DBI->connect($dbsrc);

@@ -50,7 +50,8 @@ sub permit {
         return $ret;
     } elsif (ref $permitted eq 'HASH') {
         my $ret = {};
-        while (my ($name, $type) = each %$permitted) {
+        for my $name (keys %$permitted) {
+            my $type = $permitted->{$name};
             next unless exists $input->{$name};
             my $val = $input->{$name};
             $ret->{$name} = permit($val, $type, $base.".$name");
@@ -72,8 +73,9 @@ sub validate {
     my ($self, $hash, $skip) = @_;
     my @names = qw/required presence uniqueness format numericality/;
     $skip ||= {};
-    while (my ($prop, $valids) = each %$self) {
+    for my $prop (keys %$self) {
         next if exists $skip->{$prop};
+        my $valids = $self->{$prop};
         for my $name (@names) {
             if (exists $valids->{$name}) {
                 my $params = $valids->{$name};

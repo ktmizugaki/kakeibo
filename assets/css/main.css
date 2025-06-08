@@ -186,6 +186,21 @@ form table .form-input {
   width: 100%;
 }
 
+form .form-checkbox {
+  display: block;
+  width: 100%;
+}
+form .form-checkbox input {
+  margin-left: 4em;
+}
+form .form-checkbox .form-label {
+  display: inline-block;
+  width: 10em;
+  margin: 0 4px;
+  padding: 4px 5px;
+  text-align: initial;
+}
+
 form .form-submit {
   display: inline-block;
   margin-left: 5em;

@@ -8,9 +8,22 @@
   </div>
   <div class="form-group">
     <label for="tmpl-desc" class="form-label">説明</label>
-    <input id="tmpl-desc" type="text" class="form-input"
+    <input id="tmpl-desc" type="text" class="desc form-input"
       data-bind="value: desc, css:{error:error_for('desc')}">
     <div data-bind="foreach: error_for('desc')"><span class="error" data-bind="text: $data"></span><br></div>
+  </div>
+  <div class="form-group">
+    <label for="tmpl-date" class="form-label">日</label>
+    <input id="tmpl-date" type="text" class="tmpl-date form-input"
+      data-bind="value: date, css:{error:error_for('date')}">
+    <div data-bind="foreach: error_for('date')"><span class="error" data-bind="text: $data"></span><br></div>
+  </div>
+  <div class="form-group">
+    <label for="tmpl-amounts" class="form-checkbox">
+      <input id="tmpl-amounts" type="checkbox"
+        data-bind="value: $parent.amounts">
+      <span class="form-label">金額を含める</span>
+    </label>
   </div>
 
   <span class="form-group form-submit">

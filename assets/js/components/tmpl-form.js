@@ -27,7 +27,6 @@ TmplForm.prototype.save = function() {
   if (date != undefined && date != '') {
     var datenum = parseInt(date);
     if (date != 'E' && (!date.match(/^[0-9]+$/) || datenum < 1 || datenum > 31)) {
-      console.error('invalid date for template', date);
       value.errors({date: ['is not valid']});
       self.is_saving(false);
       return;
